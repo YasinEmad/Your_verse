@@ -1,0 +1,231 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+  SHIPPING
+}
+
+enum WorldStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FULFILLED
+  CANCELLED
+  REFUNDED
+}
+
+enum ShipmentStatus {
+  ORDERED
+  PROCESSING
+  SHIPPED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum Direction {
+  LTR
+  RTL
+}
+
+model User {
+  id          String     @id @default(uuid())
+  firebaseUid String     @unique
+  email       String     @unique
+  displayName String?
+  role        Role       @default(USER)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  orders      Order[]
+  carts       Cart[]
+  auditLogs   AuditLog[]
+}
+
+model World {
+  id          String        @id @default(uuid())
+  slug        String        @unique
+  name        String
+  status      WorldStatus   @default(ACTIVE)
+  direction   Direction     @default(LTR)
+  locale      String        @default("en")
+  themeTokens Json
+  capabilities Json         @default("{}")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  categories  Category[]
+  products    Product[]
+  sections    WorldSection[]
+}
+
+model WorldSection {
+  id        String   @id @default(uuid())
+  worldId   String
+  world     World    @relation(fields: [worldId], references: [id])
+  type      String
+  position  Int
+  enabled   Boolean  @default(true)
+  config    Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([worldId, position])
+}
+
+model Category {
+  id       String    @id @default(uuid())
+  worldId  String
+  world    World     @relation(fields: [worldId], references: [id])
+  slug     String
+  name     String
+  parentId String?
+  parent   Category? @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryToCategory")
+  products Product[]
+
+  @@unique([worldId, slug])
+}
+
+model Product {
+  id          String        @id @default(uuid())
+  worldId     String
+  world       World         @relation(fields: [worldId], references: [id])
+  categoryId  String
+  category    Category      @relation(fields: [categoryId], references: [id])
+  name        String
+  slug        String
+  description String
+  status      ProductStatus @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  variants    ProductVariant[]
+  images      ProductImage[]
+
+  @@unique([worldId, slug])
+}
+
+model ProductVariant {
+  id        String      @id @default(uuid())
+  productId String
+  product   Product     @relation(fields: [productId], references: [id])
+  sku       String      @unique
+  attributes Json
+  price     Decimal
+  currency  String      @default("USD")
+  inventory Inventory?
+  cartItems CartItem[]
+  orderItems OrderItem[]
+}
+
+model ProductImage {
+  id        String  @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  url       String
+  alt       String
+  position  Int
+}
+
+model Inventory {
+  id        String          @id @default(uuid())
+  variantId String          @unique
+  variant   ProductVariant  @relation(fields: [variantId], references: [id])
+  quantity  Int             @default(0)
+  reserved  Int             @default(0)
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String?
+  user      User?      @relation(fields: [userId], references: [id])
+  guestId   String?    @unique
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String          @id @default(uuid())
+  cartId    String
+  cart      Cart            @relation(fields: [cartId], references: [id])
+  variantId String
+  variant   ProductVariant  @relation(fields: [variantId], references: [id])
+  quantity  Int
+}
+
+model Order {
+  id        String      @id @default(uuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  status    OrderStatus @default(PENDING)
+  subtotal  Decimal
+  tax       Decimal
+  total     Decimal
+  currency  String      @default("USD")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  items     OrderItem[]
+  payment   Payment?
+  shipment  Shipment?
+}
+
+model OrderItem {
+  id         String          @id @default(uuid())
+  orderId    String
+  order      Order           @relation(fields: [orderId], references: [id])
+  variantId  String
+  variant    ProductVariant  @relation(fields: [variantId], references: [id])
+  worldId    String
+  quantity   Int
+  unitPrice  Decimal
+}
+
+model Payment {
+  id          String   @id @default(uuid())
+  orderId     String   @unique
+  order       Order    @relation(fields: [orderId], references: [id])
+  provider    String
+  providerRef String
+  status      String
+  amount      Decimal
+  createdAt   DateTime @default(now())
+}
+
+model Shipment {
+  id             String         @id @default(uuid())
+  orderId        String         @unique
+  order          Order          @relation(fields: [orderId], references: [id])
+  trackingNumber String?
+  carrier        String?
+  status         ShipmentStatus  @default(ORDERED)
+  updatedAt      DateTime       @updatedAt
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  actorUserId String?
+  actor       User?    @relation(fields: [actorUserId], references: [id])
+  action      String
+  entityType  String
+  entityId    String
+  metadata    Json
+  createdAt   DateTime @default(now())
+}

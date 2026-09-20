@@ -8,10 +8,15 @@
  * wrapper. It is a network stub by design: the backend may not be running yet.
  */
 
+// Origin of the NestJS API (§ backend §2, §7 / frontend §16). Endpoint paths
+// passed to `apiFetch()` are absolute-from-origin and carry the `/api/v1` URI
+// versioning prefix themselves, e.g. `"/api/v1/auth/session"` — so the base is
+// the HOST, not a `/api`-suffixed URL. Env override wins, else `process.env`
+// server vars, else the local-dev fallback.
 const API_BASE_URL =
   process.env.API_BASE_URL ??
   process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://localhost:4000/api";
+  "http://localhost:4000";
 
 export interface ApiErrorBody {
   code?: string;

@@ -1,0 +1,32 @@
+# Local env files
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# App-specific sensitive config
+Backend/.env
+Frontend/.env
+
+# Firebase / secret material
+**/firebase*.json
+**/*service-account*.json
+**/*.pem
+**/*.key
+**/*.p12
+**/*.crt
+**/secrets/
+
+# Build / generated artifacts
+Backend/dist/
+Backend/node_modules/
+Frontend/.next/
+Frontend/build/
+Frontend/node_modules/
+**/tsconfig*.tsbuildinfo
+
+# OS/editor junk
+.DS_Store
+Thumbs.db

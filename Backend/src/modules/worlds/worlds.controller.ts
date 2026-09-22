@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Patch, Delete, UseGuards } from '@nestjs/common';
 import { WorldsService } from './worlds.service';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators';
+import { RolesGuard } from '../../common/guards';
 
 @Controller('worlds')
 export class WorldsController {

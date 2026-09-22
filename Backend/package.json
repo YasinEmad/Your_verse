@@ -19,6 +19,7 @@
     "test:cov": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",
     "test:debug": "node --inspect-brk --experimental-vm-modules -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json"
+    ,"check:b4": "node scripts/b4_service_checks.js && node scripts/b4_reorder_check.js && node scripts/b4_permissions_check.js && node scripts/b4_endpoint_check.js"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",

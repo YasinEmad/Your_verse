@@ -1,27 +1,32 @@
-"use client";
+import { notFound } from "next/navigation";
+import { renderSection } from "@/worlds/sections/render";
+import { getWorldBySlug } from "@/lib/api/worlds";
 
-import { useParams } from "next/navigation";
-import { useWorld } from "@/features/products/hooks";
+export default async function WorldHome({
+  params,
+}: {
+  params: { worldSlug: string };
+}) {
+  const world = await getWorldBySlug(params.worldSlug).catch(() => null);
 
-export default function WorldHome() {
-  const params = useParams<{ worldSlug?: string }>();
-  const worldSlug = typeof params?.worldSlug === "string" ? params.worldSlug : "anime";
-  const { data, isLoading, error } = useWorld(worldSlug);
-
-  if (isLoading) {
-    return <p className="p-8 text-muted-foreground">Loading world…</p>;
+  if (!world || world.status !== "ACTIVE") {
+    notFound();
   }
 
-  if (error) {
-    return <p className="p-8 text-red-500">Unable to load world: {String(error)}</p>;
-  }
+  const sections = [...(world.sections ?? [])]
+    .filter((section) => section.enabled)
+    .sort((a, b) => a.position - b.position)
+    .map((section) => renderSection(section))
+    .filter(Boolean);
 
   return (
-    <div className="p-8">
-      <h1 className="mb-4 text-2xl font-semibold">{data?.name ?? "World"}</h1>
-      <pre className="overflow-x-auto rounded bg-slate-100 p-4 text-sm text-slate-800">
-        {JSON.stringify(data, null, 2)}
-      </pre>
-    </div>
+    <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 md:px-8">
+      <header className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur-sm">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">World</p>
+        <h1 className="mt-2 text-3xl font-bold text-slate-900">{world.name}</h1>
+      </header>
+
+      {sections.length > 0 ? sections : <p className="text-slate-500">No active sections configured for this world.</p>}
+    </main>
   );
 }

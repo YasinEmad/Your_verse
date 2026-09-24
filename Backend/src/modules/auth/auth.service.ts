@@ -20,11 +20,86 @@ export class AuthService {
     }
   }
 
-  async createSession(idToken: string): Promise<string> {
+  async mergeGuestCartIntoUser(userId: string, guestId: string): Promise<void> {
+    const guestCart = await this.prisma.cart.findUnique({
+      where: { guestId },
+      include: {
+        items: {
+          include: {
+            variant: {
+              include: { inventory: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!guestCart) {
+      return;
+    }
+
+    const userCart = await this.prisma.cart.findFirst({
+      where: { userId },
+      include: {
+        items: {
+          include: {
+            variant: {
+              include: { inventory: true },
+            },
+          },
+        },
+      },
+    });
+
+    const targetCart =
+      userCart ??
+      (await this.prisma.cart.create({
+        data: { userId },
+        include: {
+          items: {
+            include: {
+              variant: {
+                include: { inventory: true },
+              },
+            },
+          },
+        },
+      }));
+
+    for (const item of guestCart.items) {
+      const existing = targetCart.items.find(
+        (targetItem) => targetItem.variantId === item.variantId,
+      );
+
+      if (existing) {
+        await this.prisma.cartItem.update({
+          where: { id: existing.id },
+          data: {
+            quantity: existing.quantity + item.quantity,
+          },
+        });
+        continue;
+      }
+
+      await this.prisma.cartItem.create({
+        data: {
+          cartId: targetCart.id,
+          variantId: item.variantId,
+          quantity: item.quantity,
+        },
+      });
+    }
+
+    await this.prisma.cart.delete({
+      where: { id: guestCart.id },
+    });
+  }
+
+  async createSession(idToken: string, guestId?: string): Promise<string> {
     const decoded = await this.verifyIdToken(idToken);
     const email = decoded.email ?? `${decoded.uid}@yourverse.local`;
 
-    await this.prisma.user.upsert({
+    const user = await this.prisma.user.upsert({
       where: { firebaseUid: decoded.uid },
       update: {
         email,
@@ -37,6 +112,10 @@ export class AuthService {
         role: 'USER',
       },
     });
+
+    if (guestId) {
+      await this.mergeGuestCartIntoUser(user.id, guestId);
+    }
 
     return this.firebaseAdminProvider
       .getAuth()

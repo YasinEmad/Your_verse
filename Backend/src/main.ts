@@ -9,7 +9,7 @@ import { ZodValidationPipe } from './common/pipes/zod-validation.pipe';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.use(cookieParser());
+  app.use(cookieParser(process.env.COOKIE_SECRET ?? 'yourverse-dev-secret'));
   app.use(helmet());
   app.setGlobalPrefix('api');
   app.enableVersioning({

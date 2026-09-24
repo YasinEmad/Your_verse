@@ -11,7 +11,10 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     'products.update',
     'products.delete',
     'worlds.update',
+    'worlds.sections.update',
+    'shipping.read',
+    'shipping.update',
   ],
   SUPER_ADMIN: ['*'],
-  SHIPPING: ['shipments.create', 'shipments.update'],
+  SHIPPING: ['shipping.read', 'shipping.update'],
 };

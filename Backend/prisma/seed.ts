@@ -165,6 +165,45 @@ async function main() {
           categorySlug: 'apparel',
         },
       },
+      {
+        worldId: world.id,
+        type: 'collection',
+        position: 2,
+        enabled: true,
+        config: {
+          collectionSlug: 'summer-drops',
+        },
+      },
+      {
+        worldId: world.id,
+        type: 'feature_section',
+        position: 3,
+        enabled: true,
+        config: {
+          features: [
+            { title: 'Fast Shipping', body: 'Ships worldwide quickly', icon: '🚚' },
+            { title: 'Secure Payments', body: 'Multiple providers supported', icon: '🔒' },
+          ],
+        },
+      },
+      {
+        worldId: world.id,
+        type: 'product_comparison',
+        position: 4,
+        enabled: true,
+        config: {
+          productIds: [],
+        },
+      },
+      {
+        worldId: world.id,
+        type: 'character_showcase',
+        position: 5,
+        enabled: true,
+        config: {
+          characterIds: ['naruto', 'sasuke', 'sakura'],
+        },
+      },
     ],
   });
 

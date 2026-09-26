@@ -59,3 +59,25 @@ export function useLogout() {
     },
   });
 }
+
+/**
+ * `usePermission(permission)` — §13's conditional-rendering helper, reading the
+ * already-cached session rather than issuing another request. Returns `false`
+ * while the session is still loading so a gated surface never flashes its
+ * contents before the answer arrives.
+ *
+ * The matrix arrives from `/auth/me` (backend-architecture.md §6) and a
+ * SUPER_ADMIN carries the literal `"*"` wildcard, which is treated as "every
+ * permission" — the same semantics `PermissionsGuard` gives it server-side.
+ *
+ * UX ONLY. A `true` here means "don't hide this button"; it grants nothing.
+ * Every mutation still round-trips to a Nest guard that re-derives the answer
+ * from the session cookie.
+ */
+export function usePermission(permission: string): boolean {
+  const { user, isLoading } = useSession();
+
+  if (isLoading || !user) return false;
+
+  return user.permissions.includes("*") || user.permissions.includes(permission);
+}

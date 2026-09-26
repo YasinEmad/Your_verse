@@ -180,6 +180,12 @@ model Order {
   tax       Decimal
   total     Decimal
   currency  String      @default("USD")
+  // Destination captured at checkout. Nullable because the store's checkout form
+  // does not collect it yet; a shipment cannot be fulfilled without it, which is
+  // exactly what the shipping dashboard surfaces (see ShippingService.listShipments).
+  recipientName    String?
+  recipientPhone   String?
+  shippingAddress  Json?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   items     OrderItem[]

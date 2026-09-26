@@ -6,6 +6,7 @@
  * internals:
  *
  *   - `useSession()` / `useLogout()`  — TanStack Query hooks (§13, hooks.ts)
+ *   - `usePermission(p)`              — §13's conditional-rendering helper
  *   - `SessionState` / `SignInForm`  — the query state shape, and the §12
  *     boundary form (components/SignInForm.tsx)
  *
@@ -15,6 +16,7 @@
 export {
   useSession,
   useLogout,
+  usePermission,
   type SessionState,
 } from "./hooks";
 

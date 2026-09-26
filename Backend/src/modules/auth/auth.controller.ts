@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
+import { ROLE_PERMISSIONS } from '../../common/authz/permissions';
 import {
   CurrentUser,
   type AuthenticatedUser,
@@ -45,6 +46,14 @@ export class AuthController {
     return { ok: true };
   }
 
+  /**
+   * The session payload the frontend treats as "who am I" for UX
+   * (backend-architecture.md §6, frontend §12–13). `permissions` is included
+   * so role-gated surfaces (Admin, Super Admin, Shipping) can decide what to
+   * render without a second round trip — the same matrix the guards enforce,
+   * exposed read-only. A SUPER_ADMIN gets the literal `*` wildcard, so
+   * consumers must treat "*" as "everything".
+   */
   @Get('me')
   @UseGuards(FirebaseSessionGuard)
   getCurrentUser(@CurrentUser() user: AuthenticatedUser) {
@@ -57,6 +66,7 @@ export class AuthController {
       email: user.email,
       displayName: user.displayName,
       role: user.role,
+      permissions: ROLE_PERMISSIONS[user.role] ?? [],
     };
   }
 

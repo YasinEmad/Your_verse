@@ -69,14 +69,86 @@ export class ShippingService {
     return created;
   }
 
-  async listShipments() {
-    return this.prisma.shipment.findMany({
-      orderBy: { updatedAt: 'desc' },
-      include: { order: { include: { user: true } } },
-    });
+  /**
+   * The one projection the shipping surface is allowed to see
+   * (backend-architecture.md §7 shipping / frontend §30).
+   *
+   * It deliberately does NOT `include: { user: true }`: a SHIPPING-role user
+   * needs a label, not a customer record. Shipping gets order id, order status,
+   * how many items are in the box, and the destination captured at checkout —
+   * never the customer's email, role, firebaseUid, order totals, or any product
+   * row. Anything this dashboard must not show must not be sent to it at all
+   * ("enforced backend-side, not just hidden in the UI").
+   */
+  private shipmentLabelQuery() {
+    return {
+      include: {
+        order: {
+          select: {
+            id: true,
+            status: true,
+            createdAt: true,
+            recipientName: true,
+            recipientPhone: true,
+            shippingAddress: true,
+            _count: { select: { items: true } },
+          },
+        },
+      },
+    } as const;
   }
 
-  async updateShipmentStatus(shipmentId: string, patch: { trackingNumber?: string; carrier?: string; status?: string }) {
+  private toShipmentLabel(shipment: {
+    id: string;
+    orderId: string;
+    trackingNumber: string | null;
+    carrier: string | null;
+    status: string;
+    createdAt?: Date;
+    updatedAt: Date;
+    order: {
+      id: string;
+      status: string;
+      createdAt: Date;
+      recipientName: string | null;
+      recipientPhone: string | null;
+      shippingAddress: unknown;
+      _count: { items: number };
+    };
+  }) {
+    return {
+      id: shipment.id,
+      orderId: shipment.orderId,
+      status: shipment.status,
+      trackingNumber: shipment.trackingNumber,
+      carrier: shipment.carrier,
+      updatedAt: shipment.updatedAt,
+      order: {
+        id: shipment.order.id,
+        status: shipment.order.status,
+        placedAt: shipment.order.createdAt,
+        itemCount: shipment.order._count.items,
+        recipientName: shipment.order.recipientName,
+        recipientPhone: shipment.order.recipientPhone,
+        shippingAddress: shipment.order.shippingAddress,
+      },
+    };
+  }
+
+  async listShipments() {
+    const shipments = await this.prisma.shipment.findMany({
+      orderBy: { updatedAt: 'desc' },
+      ...this.shipmentLabelQuery(),
+    });
+
+    return shipments.map((shipment) => this.toShipmentLabel(shipment));
+  }
+
+  async updateShipmentStatus(
+    shipmentId: string,
+    patch: { trackingNumber?: string; carrier?: string; status?: string },
+    actor?: { id: string },
+  ) {
     const shipment = await this.prisma.shipment.findUnique({ where: { id: shipmentId } });
 
     if (!shipment) {
@@ -120,15 +192,19 @@ export class ShippingService {
     const updated = await this.prisma.shipment.update({
       where: { id: shipmentId },
       data: {
-        trackingNumber: patch.trackingNumber ?? shipment.trackingNumber,
-        carrier: patch.carrier ?? shipment.carrier,
+        // An empty string means "clear this field" in the dashboard, not "store
+        // an empty tracking number".
+        trackingNumber: (patch.trackingNumber ?? shipment.trackingNumber ?? '').trim() || null,
+        carrier: (patch.carrier ?? shipment.carrier ?? '').trim() || null,
         status: nextStatus as any,
       },
-      include: { order: true },
+      ...this.shipmentLabelQuery(),
     });
 
     await this.auditLogService.record({
-      actorUserId: updated.order.userId,
+      // The acting shipping/admin user, not the customer the order belongs to —
+      // the audit trail must say who moved the parcel.
+      actorUserId: actor?.id,
       action: 'shipment.updated',
       entityType: 'Shipment',
       entityId: updated.id,
@@ -137,9 +213,10 @@ export class ShippingService {
         nextStatus: updated.status,
         trackingNumber: updated.trackingNumber,
         carrier: updated.carrier,
+        orderId: updated.orderId,
       },
     });
 
-    return updated;
+    return this.toShipmentLabel(updated);
   }
 }

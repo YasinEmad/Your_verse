@@ -24,8 +24,14 @@ export default async function StoreWorldLayout({
 
   const Layout = entry.Layout;
 
+  // The API stores `direction` as a Postgres enum ("LTR"/"RTL") while the
+  // registry and HTML both speak lowercase, so normalize once here — a World
+  // created from the Super-Admin dashboard must flip RTL exactly like a seeded
+  // one (frontend-architecture.md §27).
+  const direction = (world.direction ?? entry.direction).toLowerCase();
+
   return (
-    <div dir={world.direction ?? entry.direction} style={cssVars}>
+    <div dir={direction} style={cssVars}>
       <Layout>{children}</Layout>
     </div>
   );

@@ -1,11 +1,15 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { AuditLogService } from '../../audit/audit.service';
 
 const KNOWN_SECTION_TYPES = ['hero', 'products', 'rich_text'];
 
 @Injectable()
 export class SectionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLogService: AuditLogService,
+  ) {}
 
   async listForWorld(worldId: string) {
     return this.prisma.worldSection.findMany({
@@ -28,7 +32,7 @@ export class SectionsService {
 
     const position = payload.position ?? ((maxPos?.position ?? 0) + 1);
 
-    return this.prisma.worldSection.create({
+    const created = await this.prisma.worldSection.create({
       data: {
         worldId,
         type: payload.type,
@@ -37,19 +41,57 @@ export class SectionsService {
         enabled: payload.enabled ?? true,
       },
     });
+
+    await this.auditLogService.record({
+      action: 'world.section.created',
+      entityType: 'WorldSection',
+      entityId: created.id,
+      metadata: { worldId, type: created.type, position: created.position },
+    });
+
+    return created;
   }
 
   async update(worldId: string, id: string, data: Partial<{ config: any; enabled: boolean }>) {
-    return this.prisma.worldSection.update({ where: { id }, data });
+    const before = await this.prisma.worldSection.findUnique({ where: { id } });
+    const updated = await this.prisma.worldSection.update({ where: { id }, data });
+
+    await this.auditLogService.record({
+      action: 'world.section.updated',
+      entityType: 'WorldSection',
+      entityId: updated.id,
+      metadata: { worldId, before, after: updated },
+    });
+
+    return updated;
   }
 
   async remove(worldId: string, id: string) {
-    return this.prisma.worldSection.delete({ where: { id } });
+    const before = await this.prisma.worldSection.findUnique({ where: { id } });
+    const deleted = await this.prisma.worldSection.delete({ where: { id } });
+
+    await this.auditLogService.record({
+      action: 'world.section.deleted',
+      entityType: 'WorldSection',
+      entityId: deleted.id,
+      metadata: { worldId, before, after: null },
+    });
+
+    return deleted;
   }
 
   async reorder(worldId: string, positions: Array<{ id: string; position: number }>) {
     // perform all updates in a transaction to guarantee atomic reorder
     const ops = positions.map((p) => this.prisma.worldSection.update({ where: { id: p.id }, data: { position: p.position } }));
-    return this.prisma.$transaction(ops);
+    const updated = await this.prisma.$transaction(ops);
+
+    await this.auditLogService.record({
+      action: 'world.section.reordered',
+      entityType: 'WorldSection',
+      entityId: positions[0]?.id ?? worldId,
+      metadata: { worldId, positions, updatedIds: updated.map((item) => item.id) },
+    });
+
+    return updated;
   }
 }

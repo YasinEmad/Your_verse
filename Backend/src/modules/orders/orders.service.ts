@@ -1,12 +1,16 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CartService } from '../cart/cart.service';
+import { ShippingService } from '../shipping/shipping.service';
+import { AuditLogService } from '../audit/audit.service';
 
 @Injectable()
 export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cartService: CartService,
+    private readonly shippingService: ShippingService,
+    private readonly auditLogService: AuditLogService,
   ) {}
 
   async createOrder(userId: string) {
@@ -68,6 +72,19 @@ export class OrdersService {
       return order;
     });
 
+    await this.auditLogService.record({
+      actorUserId: userId,
+      action: 'order.created',
+      entityType: 'Order',
+      entityId: orderCreate.id,
+      metadata: {
+        subtotal,
+        tax,
+        total,
+        currency: cart.items[0]?.variant?.currency ?? 'USD',
+      },
+    });
+
     // Return full order with items
     return this.prisma.order.findUnique({
       where: { id: orderCreate.id },
@@ -127,6 +144,20 @@ export class OrdersService {
 
       await tx.order.update({ where: { id: order.id }, data: { status: 'PAID' } });
     });
+
+    await this.auditLogService.record({
+      actorUserId: userId,
+      action: 'order.paid',
+      entityType: 'Order',
+      entityId: order.id,
+      metadata: {
+        provider,
+        providerRef,
+        amount,
+      },
+    });
+
+    await this.shippingService.createForOrder(order.id);
 
     return this.getOrder(userId, orderId);
   }

@@ -15,6 +15,6 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     'shipping.read',
     'shipping.update',
   ],
-  SUPER_ADMIN: ['*'],
-  SHIPPING: ['shipping.read', 'shipping.update'],
+  SUPER_ADMIN: ['*', 'super_admin.audit.read'],
+  SHIPPING: ['orders.read', 'shipping.read', 'shipping.update'],
 };

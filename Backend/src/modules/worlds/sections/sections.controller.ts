@@ -3,6 +3,7 @@ import { ApiCookieAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 import { Throttle } from '@nestjs/throttler';
 import { z } from 'zod';
 import { SectionsService } from './sections.service';
+import { KNOWN_SECTION_TYPES } from './section-types';
 import { Permissions } from '../../../common/decorators/permissions.decorator';
 import { FirebaseSessionGuard } from '../../../common/guards/firebase-session.guard';
 import { PermissionsGuard } from '../../../common/guards/permissions.guard';
@@ -19,10 +20,10 @@ import { worldSectionSchema } from '../../../docs/response-schemas';
  * job, World *identity* is Super Admin's.
  *
  * `config` is validated loosely here (must be a JSON object) and authoritatively
- * by the frontend's `renderSection` at render time (§11): the backend's job is to
+ * by the frontend's `renderSection` at render time (§17): the backend's job is to
  * refuse obviously malformed data, not to own UI rendering rules.
  */
-const SectionTypeSchema = z.enum(['hero', 'products', 'rich_text']);
+const SectionTypeSchema = z.enum(KNOWN_SECTION_TYPES);
 
 const CreateSectionSchema = z
   .object({

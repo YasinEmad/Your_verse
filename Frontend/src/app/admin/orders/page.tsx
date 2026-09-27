@@ -24,17 +24,17 @@ export default function AdminOrdersPage() {
             <table className="min-w-full text-left text-sm text-slate-700">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-500">
-                  <th className="py-2 pr-4">Order</th>
-                  <th className="py-2 pr-4">Status</th>
-                  <th className="py-2 pr-4">Total</th>
+                  <th className="py-2 pe-4">Order</th>
+                  <th className="py-2 pe-4">Status</th>
+                  <th className="py-2 pe-4">Total</th>
                 </tr>
               </thead>
               <tbody>
                 {orders.map((order) => (
                   <tr key={order.id} className="border-b border-slate-100 align-top">
-                    <td className="py-2 pr-4 font-medium text-slate-900">{order.id}</td>
-                    <td className="py-2 pr-4">{order.status}</td>
-                    <td className="py-2 pr-4">${order.total.toFixed(2)}</td>
+                    <td className="py-2 pe-4 font-medium text-slate-900">{order.id}</td>
+                    <td className="py-2 pe-4">{order.status}</td>
+                    <td className="py-2 pe-4">${order.total.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>

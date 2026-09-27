@@ -61,17 +61,17 @@ export default function AdminProductsPage() {
             <table className="min-w-full text-left text-sm text-slate-700">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-500">
-                  <th className="py-2 pr-4">Name</th>
-                  <th className="py-2 pr-4">Status</th>
-                  <th className="py-2 pr-4">Variants</th>
+                  <th className="py-2 pe-4">Name</th>
+                  <th className="py-2 pe-4">Status</th>
+                  <th className="py-2 pe-4">Variants</th>
                 </tr>
               </thead>
               <tbody>
                 {query.data.map((product) => (
                   <tr key={product.id} className="border-b border-slate-100 align-top">
-                    <td className="py-2 pr-4 font-medium text-slate-900">{product.name}</td>
-                    <td className="py-2 pr-4">{product.status}</td>
-                    <td className="py-2 pr-4">{product.variants.length}</td>
+                    <td className="py-2 pe-4 font-medium text-slate-900">{product.name}</td>
+                    <td className="py-2 pe-4">{product.status}</td>
+                    <td className="py-2 pe-4">{product.variants.length}</td>
                   </tr>
                 ))}
               </tbody>

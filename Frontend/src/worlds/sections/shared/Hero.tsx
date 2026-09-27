@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 type HeroConfig = {
   title: string;
   subtitle?: string;
@@ -17,9 +19,11 @@ export function Hero({ config }: { config: HeroConfig }) {
             <p className="mt-3 max-w-xl text-base text-slate-600">{config.subtitle}</p>
           ) : null}
         </div>
-        <img
+        <Image
           src={config.imageUrl}
           alt={config.title}
+          width={1200}
+          height={640}
           className="h-56 w-full rounded-xl object-cover"
         />
       </div>

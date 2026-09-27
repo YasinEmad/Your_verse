@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { AuditLogService } from '../../audit/audit.service';
 import { InvalidSectionConfigException, SectionNotFoundException } from './sections.exceptions';
-
-const KNOWN_SECTION_TYPES = ['hero', 'products', 'rich_text'];
+import { isKnownSectionType } from './section-types';
 
 @Injectable()
 export class SectionsService {
@@ -29,7 +28,7 @@ export class SectionsService {
   }
 
   async create(worldId: string, payload: { type: string; config: any; position?: number; enabled?: boolean }) {
-    if (!KNOWN_SECTION_TYPES.includes(payload.type)) {
+    if (!isKnownSectionType(payload.type)) {
       throw new InvalidSectionConfigException(`Unknown section type: ${payload.type}`);
     }
 
@@ -112,6 +111,9 @@ export class SectionsService {
       metadata: { worldId, positions, updatedIds: updated.map((item) => item.id) },
     });
 
-    return updated;
+    // `$transaction` resolves in the order the operations were submitted, which is
+    // the caller's array order rather than the new render order. Re-read so the
+    // response matches the documented "in the new order" contract.
+    return this.listForWorld(worldId);
   }
 }

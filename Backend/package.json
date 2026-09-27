@@ -22,7 +22,8 @@
     "check:b4": "node scripts/b4_service_checks.js && node scripts/b4_reorder_check.js && node scripts/b4_permissions_check.js && node scripts/b4_endpoint_check.js",
     "check:f9": "node scripts/f9_super_admin_check.js",
     "check:f10": "node scripts/f10_shipping_check.js",
-    "check:b10": "node scripts/b10_hardening_check.js"
+    "check:b10": "node scripts/b10_hardening_check.js",
+    "check:f11": "node scripts/f11_world_catalog_check.js"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",

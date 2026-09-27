@@ -1,5 +1,9 @@
-import React, { type ReactNode } from "react";
+import { worldLayout } from "./withFont";
 
-export function TechLayout({ children }: { children: ReactNode }) {
-  return React.createElement("div", { className: "min-h-screen bg-slate-950 text-slate-100" }, children);
-}
+export const TECH_FONT_CLASS = "font-mono";
+
+export const TechLayout = worldLayout(
+  "TechLayout",
+  "min-h-screen bg-slate-950 text-slate-100",
+  TECH_FONT_CLASS,
+);

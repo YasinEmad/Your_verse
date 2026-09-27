@@ -1,5 +1,9 @@
-import React, { type ReactNode } from "react";
+import { worldLayout } from "./withFont";
 
-export function AnimeLayout({ children }: { children: ReactNode }) {
-  return React.createElement("div", { className: "min-h-screen bg-slate-950 text-white" }, children);
-}
+export const ANIME_FONT_CLASS = "font-sans";
+
+export const AnimeLayout = worldLayout(
+  "AnimeLayout",
+  "min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-800 text-white",
+  ANIME_FONT_CLASS,
+);

@@ -25,7 +25,7 @@ const { SectionsService } = require('../dist/modules/worlds/sections/sections.se
     const world = await prisma.world.create({ data: { slug, name: 'B4 Reorder', themeTokens: {} } });
     const worldId = world.id;
     const first = await svc.create(worldId, { type: 'hero', config: {} });
-    await svc.create(worldId, { type: 'rich_text', config: {} });
+    await svc.create(worldId, { type: 'feature_section', config: {} });
 
     const before = await svc.listForWorld(worldId);
     console.log('Before positions:', before.map((s) => ({ id: s.id, position: s.position })));

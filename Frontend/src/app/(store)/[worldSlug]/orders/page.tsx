@@ -49,7 +49,7 @@ export default function OrdersPage() {
 
             <div className="mt-3 text-sm">
               <strong>Items:</strong>
-              <ul className="list-disc ml-6">
+              <ul className="list-disc ms-6">
                 {o.items.map((it) => (
                   <li key={it.id}>
                     {it.variantId} × {it.quantity} @ {o.currency} {it.unitPrice}

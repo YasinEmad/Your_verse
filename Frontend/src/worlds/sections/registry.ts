@@ -7,6 +7,7 @@ import { FeatureSection } from "./shared/FeatureSection";
 import { ProductComparison } from "./shared/ProductComparison";
 import { CharacterShowcase } from "./anime/CharacterShowcase";
 import { ChessBoard } from "./chess/ChessBoard";
+import { ChessHero } from "./chess/ChessHero";
 
 export const sectionSchemas = {
   hero: z.object({
@@ -39,6 +40,26 @@ export const sectionSchemas = {
   }),
   chess_board: z.object({
     mode: z.enum(["preview", "puzzle"]),
+    title: z.string().optional(),
+    startFen: z.string().optional(),
+    showCoordinates: z.boolean().optional(),
+  }),
+  chess_hero: z.object({
+    eyebrow: z.string().optional(),
+    title: z.string(),
+    subtitle: z.string().optional(),
+    imageUrl: z.string().url().optional(),
+    stats: z
+      .array(
+        z.object({
+          label: z.string(),
+          value: z.string(),
+        }),
+      )
+      .max(4)
+      .optional(),
+    ctaLabel: z.string().optional(),
+    ctaHref: z.string().optional(),
   }),
 } as const;
 
@@ -65,5 +86,6 @@ export const SECTION_COMPONENTS: {
   feature_section: FeatureSection,
   product_comparison: ProductComparison,
   character_showcase: CharacterShowcase,
+  chess_hero: ChessHero,
   chess_board: ChessBoard,
 };

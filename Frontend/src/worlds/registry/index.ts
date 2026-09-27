@@ -1,4 +1,10 @@
-import React, { type ComponentType, type ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
+import { DefaultLayout, DEFAULT_FONT_CLASS } from "./default";
+import { AnimeLayout, ANIME_FONT_CLASS } from "./anime";
+import { TechLayout, TECH_FONT_CLASS } from "./tech";
+import { ChessLayout, CHESS_FONT_CLASS } from "./chess";
+import { ArabicLayout, ARABIC_FONT_CLASS } from "./arabic";
+import { GamingLayout, GAMING_FONT_CLASS } from "./gaming";
 
 export interface WorldRegistryEntry {
   slug: string;
@@ -7,64 +13,41 @@ export interface WorldRegistryEntry {
   direction: "ltr" | "rtl";
 }
 
-function DefaultLayout({ children }: { children: ReactNode }) {
-  return React.createElement("div", { className: "min-h-screen bg-slate-50 text-slate-900" }, children);
-}
-
-const AnimeLayout = ({ children }: { children: ReactNode }) =>
-  React.createElement(
-    "div",
-    { className: "min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-800 text-white" },
-    children,
-  );
-
-const TechLayout = ({ children }: { children: ReactNode }) =>
-  React.createElement("div", { className: "min-h-screen bg-slate-950 text-slate-100" }, children);
-
-const ChessLayout = ({ children }: { children: ReactNode }) =>
-  React.createElement("div", { className: "min-h-screen bg-[#f6f1e7] text-slate-900" }, children);
-
-const ArabicLayout = ({ children }: { children: ReactNode }) =>
-  React.createElement("div", { className: "min-h-screen bg-[#f8f3ee] text-slate-900" }, children);
-
-const GamingLayout = ({ children }: { children: ReactNode }) =>
-  React.createElement("div", { className: "min-h-screen bg-[#0b1020] text-slate-100" }, children);
-
 export const WORLD_REGISTRY: Record<string, WorldRegistryEntry> = {
   default: {
     slug: "default",
     Layout: DefaultLayout,
-    fontClassName: "font-sans",
+    fontClassName: DEFAULT_FONT_CLASS,
     direction: "ltr",
   },
   anime: {
     slug: "anime",
     Layout: AnimeLayout,
-    fontClassName: "font-sans",
+    fontClassName: ANIME_FONT_CLASS,
     direction: "ltr",
   },
   tech: {
     slug: "tech",
     Layout: TechLayout,
-    fontClassName: "font-mono",
+    fontClassName: TECH_FONT_CLASS,
     direction: "ltr",
   },
   chess: {
     slug: "chess",
     Layout: ChessLayout,
-    fontClassName: "font-sans",
+    fontClassName: CHESS_FONT_CLASS,
     direction: "ltr",
   },
   arabic: {
     slug: "arabic",
     Layout: ArabicLayout,
-    fontClassName: "font-sans",
+    fontClassName: ARABIC_FONT_CLASS,
     direction: "rtl",
   },
   gaming: {
     slug: "gaming",
     Layout: GamingLayout,
-    fontClassName: "font-sans",
+    fontClassName: GAMING_FONT_CLASS,
     direction: "ltr",
   },
 };
@@ -72,4 +55,3 @@ export const WORLD_REGISTRY: Record<string, WorldRegistryEntry> = {
 export function getWorldRegistryEntry(slug: string): WorldRegistryEntry {
   return WORLD_REGISTRY[slug] ?? WORLD_REGISTRY.default;
 }
-

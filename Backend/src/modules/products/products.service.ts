@@ -1,6 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { PrismaService } from '../../prisma/prisma.service';
+import {
+  ProductCategoryNotFoundException,
+  ProductNotFoundException,
+  WorldMismatchException,
+} from './products.exceptions';
 
 const ProductStatusSchema = z.enum(['DRAFT', 'ACTIVE', 'ARCHIVED']);
 
@@ -95,7 +100,7 @@ export class ProductsService {
     });
 
     if (!product) {
-      throw new NotFoundException('Product not found');
+      throw new ProductNotFoundException();
     }
 
     return normalizeProduct(product);
@@ -107,12 +112,12 @@ export class ProductsService {
     });
 
     if (!category) {
-      throw new NotFoundException('Category not found');
+      throw new ProductCategoryNotFoundException();
     }
 
     const effectiveWorldId = data.worldId ?? worldId;
     if (effectiveWorldId !== worldId) {
-      throw new NotFoundException('World mismatch');
+      throw new WorldMismatchException();
     }
 
     const baseSlug = slugify(data.name);
@@ -167,7 +172,7 @@ export class ProductsService {
     });
 
     if (!product) {
-      throw new NotFoundException('Product not found');
+      throw new ProductNotFoundException();
     }
 
     if (data.categoryId) {
@@ -176,7 +181,7 @@ export class ProductsService {
       });
 
       if (!category) {
-        throw new NotFoundException('Category not found');
+        throw new ProductCategoryNotFoundException();
       }
     }
 
@@ -202,7 +207,7 @@ export class ProductsService {
     });
 
     if (!product) {
-      throw new NotFoundException('Product not found');
+      throw new ProductNotFoundException();
     }
 
     return this.prisma.product.delete({

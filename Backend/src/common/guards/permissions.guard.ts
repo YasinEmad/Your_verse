@@ -1,8 +1,13 @@
-import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import type { AuthenticatedUser } from '../decorators/current-user.decorator';
 import { ROLE_PERMISSIONS } from '../authz/permissions';
+import {
+  ErrorCode,
+  ForbiddenDomainException,
+  UnauthorizedDomainException,
+} from '../errors/domain.exception';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -14,7 +19,7 @@ export class PermissionsGuard implements CanActivate {
 
     const req = context.switchToHttp().getRequest<Request & { user?: AuthenticatedUser }>();
     const user = req.user;
-    if (!user) throw new ForbiddenException('User not authenticated');
+    if (!user) throw new UnauthorizedDomainException(ErrorCode.UNAUTHENTICATED, 'User not authenticated');
 
     const role = user.role as string;
     const allowed = ROLE_PERMISSIONS[role] || [];
@@ -26,6 +31,6 @@ export class PermissionsGuard implements CanActivate {
     const ok = required.some((p) => allowed.includes(p));
     if (ok) return true;
 
-    throw new ForbiddenException('Insufficient permissions');
+    throw new ForbiddenDomainException(ErrorCode.FORBIDDEN, 'Insufficient permissions');
   }
 }

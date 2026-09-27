@@ -1,28 +1,24 @@
 import 'dotenv/config';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import cookieParser from 'cookie-parser';
-import helmet from 'helmet';
 import { AppModule } from './app.module';
-import { ZodValidationPipe } from './common/pipes/zod-validation.pipe';
+import { configureApp } from './bootstrap';
+import { corsOriginAllowlist } from './common/http/cors';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  configureApp(app);
 
-  app.use(cookieParser(process.env.COOKIE_SECRET ?? 'yourverse-dev-secret'));
-  app.use(helmet());
-  app.setGlobalPrefix('api');
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: '1',
-    prefix: 'v',
-  });
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
-  app.useGlobalPipes(new ZodValidationPipe());
-  app.enableCors({
-    origin: process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : true,
-    credentials: true,
-  });
+  const allowed = corsOriginAllowlist();
+  if (!allowed.length) {
+    // Fails visibly: with an empty allowlist every cross-origin call is blocked.
+    // Better a broken dev environment than an open production one. Goes through
+    // the Nest logger rather than `console`, so it lands as one JSON line like
+    // every other line in the log.
+    new Logger('Config').warn(
+      'FRONTEND_URL / FRONTEND_URLS is not set — cross-origin requests will be blocked.',
+    );
+  }
 
   await app.listen(process.env.PORT ?? 3001);
 }

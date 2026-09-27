@@ -67,6 +67,14 @@ export async function apiFetch<T>(
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      // §15 CSRF. The session cookie is HttpOnly and same-site, which stops a
+      // *third-party* site from reading it but not from having the browser attach
+      // it to a cross-site form post. A custom header cannot be set by a
+      // cross-site form, and cannot be set cross-origin without a CORS preflight
+      // the allowlist has to approve — so its presence proves the request came
+      // from our own code. The backend's CsrfGuard rejects any mutating request
+      // without it with 403 CSRF_HEADER_MISSING.
+      "X-Requested-With": "yourverse",
       ...init.headers,
     },
   });

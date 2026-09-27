@@ -1,9 +1,10 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import {
+  OrderNotShippableException,
+  ShipmentNotFoundException,
+  ShipmentTransitionException,
+} from './shipping.exceptions';
 import { AuditLogService } from '../audit/audit.service';
 
 const SHIPMENT_STATUS_ORDER = [
@@ -37,11 +38,11 @@ export class ShippingService {
     });
 
     if (!order) {
-      throw new NotFoundException('Order not found');
+      throw new OrderNotShippableException();
     }
 
     if (order.status !== 'PAID') {
-      throw new BadRequestException('Only PAID orders can create a shipment');
+      throw new ShipmentTransitionException('Only PAID orders can create a shipment');
     }
 
     if (order.shipment) {
@@ -152,12 +153,12 @@ export class ShippingService {
     const shipment = await this.prisma.shipment.findUnique({ where: { id: shipmentId } });
 
     if (!shipment) {
-      throw new NotFoundException('Shipment not found');
+      throw new ShipmentNotFoundException(shipmentId);
     }
 
     const nextStatus = patch.status ?? shipment.status;
     if (!SHIPMENT_STATUS_SET.has(nextStatus)) {
-      throw new BadRequestException(`Invalid shipment status: ${nextStatus}`);
+      throw new ShipmentTransitionException(`Invalid shipment status: ${nextStatus}`);
     }
 
     const currentIndex = SHIPMENT_STATUS_ORDER.indexOf(shipment.status as (typeof SHIPMENT_STATUS_ORDER)[number]);
@@ -165,27 +166,23 @@ export class ShippingService {
 
     if (nextStatus === 'CANCELLED') {
       if (shipment.status === 'DELIVERED') {
-        throw new BadRequestException('Cannot cancel a delivered shipment');
+        throw new ShipmentTransitionException('Cannot cancel a delivered shipment');
       }
     } else {
       if (currentIndex === -1) {
-        throw new BadRequestException(`Invalid current shipment status: ${shipment.status}`);
+        throw new ShipmentTransitionException(`Invalid current shipment status: ${shipment.status}`);
       }
 
       if (nextIndex === -1) {
-        throw new BadRequestException(`Invalid shipment status transition: ${shipment.status} -> ${nextStatus}`);
+        throw new ShipmentTransitionException(`Invalid shipment status transition: ${shipment.status} -> ${nextStatus}`);
       }
 
       if (nextIndex > currentIndex + 1) {
-        throw new BadRequestException(
-          `Invalid shipment status transition: ${shipment.status} -> ${nextStatus}`,
-        );
+        throw new ShipmentTransitionException(`Invalid shipment status transition: ${shipment.status} -> ${nextStatus}`);
       }
 
       if (nextIndex < currentIndex && nextStatus !== 'CANCELLED') {
-        throw new BadRequestException(
-          `Invalid shipment status transition: ${shipment.status} -> ${nextStatus}`,
-        );
+        throw new ShipmentTransitionException(`Invalid shipment status transition: ${shipment.status} -> ${nextStatus}`);
       }
     }
 

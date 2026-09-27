@@ -15,6 +15,7 @@ import { ShippingModule } from './modules/shipping/shipping.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { SuperAdminModule } from './modules/super-admin/super-admin.module';
 import { AuditModule } from './modules/audit/audit.module';
+import { ThrottlingModule } from './common/throttling/throttling.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AuditModule } from './modules/audit/audit.module';
     AdminModule,
     SuperAdminModule,
     AuditModule,
+    ThrottlingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,5 +1,6 @@
-import { ArgumentMetadata, BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
+import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
 import { ZodError, type ZodTypeAny } from 'zod';
+import { BadRequestDomainException, ErrorCode } from '../errors/domain.exception';
 
 @Injectable()
 export class ZodValidationPipe implements PipeTransform {
@@ -17,10 +18,10 @@ export class ZodValidationPipe implements PipeTransform {
       // client the server broke when actually the *request* was malformed.
       // Normalize it to a 400 with a flat, client-readable message list.
       if (error instanceof ZodError) {
-        throw new BadRequestException({
-          code: 'VALIDATION_FAILED',
-          message: error.issues.map((issue) => `${issue.path.join('.') || 'body'}: ${issue.message}`),
-        });
+        throw new BadRequestDomainException(
+          ErrorCode.VALIDATION_FAILED,
+          error.issues.map((issue) => `${issue.path.join('.') || 'body'}: ${issue.message}`),
+        );
       }
       throw error;
     }

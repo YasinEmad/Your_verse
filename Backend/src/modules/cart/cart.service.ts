@@ -1,5 +1,11 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ProductVariantNotFoundException } from '../products/products.exceptions';
+import {
+  CartItemNotFoundException,
+  CartNotFoundException,
+  InsufficientInventoryException,
+} from './cart.exceptions';
 
 const cartInclude = {
   items: {
@@ -237,7 +243,7 @@ export class CartService {
     const cart = await this.resolveCart(userId, guestId, true);
 
     if (!cart) {
-      throw new BadRequestException('Cart not found');
+      throw new CartNotFoundException();
     }
 
     const variant = await this.prisma.productVariant.findUnique({
@@ -249,21 +255,19 @@ export class CartService {
     });
 
     if (!variant) {
-      throw new NotFoundException('Product variant not found');
+      throw new ProductVariantNotFoundException(variantId);
     }
 
     const available = (variant.inventory?.quantity ?? 0) - (variant.inventory?.reserved ?? 0);
     if (available <= 0 || quantity > available) {
-      throw new BadRequestException(
-        `Only ${available} units are available for this item.`,
-      );
+      throw new InsufficientInventoryException(`Only ${available} units are available for this item.`);
     }
 
     const existingItem = cart.items.find((item: any) => item.variantId === variantId);
     const nextQuantity = (existingItem?.quantity ?? 0) + quantity;
 
     if (nextQuantity > available) {
-      throw new BadRequestException(
+      throw new InsufficientInventoryException(
         `Only ${available - (existingItem?.quantity ?? 0)} more units can be added.`,
       );
     }
@@ -300,7 +304,7 @@ export class CartService {
     const cart = await this.resolveCart(userId, guestId, true);
 
     if (!cart) {
-      throw new BadRequestException('Cart not found');
+      throw new CartNotFoundException();
     }
 
     const item = await this.prisma.cartItem.findFirst({
@@ -318,14 +322,12 @@ export class CartService {
     });
 
     if (!item) {
-      throw new NotFoundException('Cart item not found');
+      throw new CartItemNotFoundException();
     }
 
     const available = (item.variant.inventory?.quantity ?? 0) - (item.variant.inventory?.reserved ?? 0);
     if (quantity > available) {
-      throw new BadRequestException(
-        `Only ${available} units are available for this item.`,
-      );
+      throw new InsufficientInventoryException(`Only ${available} units are available for this item.`);
     }
 
     await this.prisma.cartItem.update({
@@ -345,7 +347,7 @@ export class CartService {
     const cart = await this.resolveCart(userId, guestId, true);
 
     if (!cart) {
-      throw new BadRequestException('Cart not found');
+      throw new CartNotFoundException();
     }
 
     const item = await this.prisma.cartItem.findFirst({
@@ -356,7 +358,7 @@ export class CartService {
     });
 
     if (!item) {
-      throw new NotFoundException('Cart item not found');
+      throw new CartItemNotFoundException();
     }
 
     await this.prisma.cartItem.delete({

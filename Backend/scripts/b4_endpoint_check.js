@@ -1,9 +1,18 @@
+/**
+ * Smoke check against a *running* server. The port comes from the environment
+ * (PORT, then API_URL) instead of a hardcoded 3001, so it works against whatever
+ * port the dev server is actually on rather than failing with ECONNREFUSED.
+ */
+require('dotenv/config');
+
 const fetch = global.fetch || require('node-fetch');
 
+const baseUrl = process.env.API_URL ?? `http://localhost:${process.env.PORT ?? 3001}`;
+
 (async () => {
-  const res = await fetch('http://localhost:3001/api/v1/worlds/anime');
+  const res = await fetch(`${baseUrl}/api/v1/worlds/anime`);
   if (!res.ok) {
-    console.error('Failed to fetch world endpoint:', res.status, await res.text());
+    console.error(`Failed to fetch ${baseUrl}/api/v1/worlds/anime:`, res.status, await res.text());
     process.exit(2);
   }
 

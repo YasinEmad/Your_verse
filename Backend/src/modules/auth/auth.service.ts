@@ -1,6 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 import { PrismaService } from '../../prisma/prisma.service';
+import { InvalidIdTokenException, InvalidSessionException } from './auth.exceptions';
 import { FirebaseAdminProvider } from './firebase-admin.provider';
 
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -16,7 +17,7 @@ export class AuthService {
     try {
       return await this.firebaseAdminProvider.getAuth().verifyIdToken(idToken);
     } catch {
-      throw new UnauthorizedException('Invalid Firebase ID token');
+      throw new InvalidIdTokenException();
     }
   }
 
@@ -128,7 +129,7 @@ export class AuthService {
         .getAuth()
         .verifySessionCookie(cookie, true);
     } catch {
-      throw new UnauthorizedException('Invalid or revoked session cookie');
+      throw new InvalidSessionException();
     }
   }
 

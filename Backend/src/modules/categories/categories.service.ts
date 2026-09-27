@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CategoryNotFoundException, InvalidParentCategoryException } from './categories.exceptions';
 
 export const CreateCategorySchema = z.object({
   slug: z.string().trim().min(1),
@@ -29,7 +30,7 @@ export class CategoriesService {
       });
 
       if (!parent) {
-        throw new NotFoundException('Parent category not found');
+        throw new CategoryNotFoundException(data.parentId);
       }
     }
 
@@ -50,12 +51,12 @@ export class CategoriesService {
     });
 
     if (!category) {
-      throw new NotFoundException('Category not found');
+      throw new CategoryNotFoundException(id);
     }
 
     if (data.parentId) {
       if (data.parentId === id) {
-        throw new NotFoundException('A category cannot be its own parent');
+        throw new InvalidParentCategoryException();
       }
 
       const parent = await this.prisma.category.findFirst({
@@ -63,7 +64,7 @@ export class CategoriesService {
       });
 
       if (!parent) {
-        throw new NotFoundException('Parent category not found');
+        throw new CategoryNotFoundException(data.parentId);
       }
     }
 
@@ -83,7 +84,7 @@ export class CategoriesService {
     });
 
     if (!category) {
-      throw new NotFoundException('Category not found');
+      throw new CategoryNotFoundException(id);
     }
 
     return this.prisma.category.delete({

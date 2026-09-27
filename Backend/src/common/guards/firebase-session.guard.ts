@@ -1,11 +1,7 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import type { Request } from 'express';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ErrorCode, UnauthorizedDomainException } from '../errors/domain.exception';
 import { AuthService } from '../../modules/auth/auth.service';
 import type { AuthenticatedUser } from '../decorators/current-user.decorator';
 
@@ -23,7 +19,7 @@ export class FirebaseSessionGuard implements CanActivate {
 
     const sessionCookie = request.cookies?.['__session'];
     if (!sessionCookie) {
-      throw new UnauthorizedException('No session cookie');
+      throw new UnauthorizedDomainException(ErrorCode.UNAUTHENTICATED, 'No session cookie');
     }
 
     const decoded = await this.authService.verifySessionCookie(sessionCookie);
@@ -32,7 +28,7 @@ export class FirebaseSessionGuard implements CanActivate {
     });
 
     if (!user) {
-      throw new UnauthorizedException('User not provisioned');
+      throw new UnauthorizedDomainException(ErrorCode.UNAUTHENTICATED, 'User not provisioned');
     }
 
     request.user = {

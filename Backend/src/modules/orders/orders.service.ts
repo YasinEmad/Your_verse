@@ -1,8 +1,14 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CartService } from '../cart/cart.service';
 import { ShippingService } from '../shipping/shipping.service';
 import { AuditLogService } from '../audit/audit.service';
+import { InsufficientInventoryException } from '../cart/cart.exceptions';
+import {
+  EmptyCartException,
+  OrderNotFoundException,
+  OrderStateException,
+} from './orders.exceptions';
 
 @Injectable()
 export class OrdersService {
@@ -16,14 +22,14 @@ export class OrdersService {
   async createOrder(userId: string) {
     const cart = await this.cartService.resolveCart(userId, undefined, false);
     if (!cart || !(cart.items?.length > 0)) {
-      throw new BadRequestException('Cart is empty');
+      throw new EmptyCartException();
     }
 
     // Verify availability
     for (const item of cart.items) {
       const available = (item.variant.inventory?.quantity ?? 0) - (item.variant.inventory?.reserved ?? 0);
       if (item.quantity > available) {
-        throw new BadRequestException(`Not enough inventory for variant ${item.variantId}`);
+        throw new InsufficientInventoryException(`Not enough inventory for variant ${item.variantId}`);
       }
     }
 
@@ -107,7 +113,7 @@ export class OrdersService {
     });
 
     if (!order) {
-      throw new NotFoundException('Order not found');
+      throw new OrderNotFoundException(orderId);
     }
 
     return order;
@@ -116,11 +122,11 @@ export class OrdersService {
   async payOrder(userId: string, orderId: string, provider: string, providerRef: string, amount: number) {
     const order = await this.prisma.order.findFirst({ where: { id: orderId, userId }, include: { items: true } });
     if (!order) {
-      throw new NotFoundException('Order not found');
+      throw new OrderNotFoundException(orderId);
     }
 
     if (order.status !== 'PENDING') {
-      throw new BadRequestException('Order is not in pending state');
+      throw new OrderStateException('Order is not in pending state');
     }
 
     await this.prisma.$transaction(async (tx) => {

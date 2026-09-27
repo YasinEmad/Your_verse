@@ -1,7 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditLogService } from '../audit/audit.service';
 import type { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
+import { SelfRoleChangeException, UserNotFoundException } from './super-admin.exceptions';
 
 @Injectable()
 export class SuperAdminService {
@@ -60,13 +61,13 @@ export class SuperAdminService {
   ) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new UserNotFoundException(userId);
     }
 
     if (actor && actor.id === userId && role !== user.role) {
       // Self-demotion would leave the platform with zero SUPER_ADMINs and no
       // way back in, so it is refused rather than silently allowed.
-      throw new ForbiddenException('You cannot change your own role');
+      throw new SelfRoleChangeException();
     }
 
     const updated = await this.prisma.user.update({

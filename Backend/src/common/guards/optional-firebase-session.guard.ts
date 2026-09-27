@@ -1,13 +1,9 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import type { Request } from 'express';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuthService } from '../../modules/auth/auth.service';
 import type { AuthenticatedUser } from '../decorators/current-user.decorator';
+import { ErrorCode, UnauthorizedDomainException } from '../errors/domain.exception';
 
 @Injectable()
 export class OptionalFirebaseSessionGuard implements CanActivate {
@@ -39,7 +35,7 @@ export class OptionalFirebaseSessionGuard implements CanActivate {
     });
 
     if (!user) {
-      throw new UnauthorizedException('User not provisioned');
+      throw new UnauthorizedDomainException(ErrorCode.UNAUTHENTICATED, 'User not provisioned');
     }
 
     request.user = {

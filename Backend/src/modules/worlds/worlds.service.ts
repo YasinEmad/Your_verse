@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditLogService } from '../audit/audit.service';
+import { WorldNotEmptyException, WorldNotFoundException } from './worlds.exceptions';
 
 @Injectable()
 export class WorldsService {
@@ -14,7 +15,7 @@ export class WorldsService {
       where: { slug },
       include: { sections: { orderBy: { position: 'asc' } } },
     });
-    if (!world) throw new NotFoundException('World not found');
+    if (!world) throw new WorldNotFoundException();
 
     // map to the exact public shape expected by the frontend
     return {
@@ -93,7 +94,7 @@ export class WorldsService {
   async patch(id: string, data: Partial<{ name: string; slug: string; status?: any; locale: string; direction?: any; themeTokens: any; capabilities: any }>) {
     const before = await this.prisma.world.findUnique({ where: { id } });
     if (!before) {
-      throw new NotFoundException('World not found');
+      throw new WorldNotFoundException(id);
     }
 
     const safe: any = { ...data };
@@ -116,12 +117,29 @@ export class WorldsService {
   }
 
   async remove(id: string) {
-    const existing = await this.prisma.world.findUnique({ where: { id } });
+    const existing = await this.prisma.world.findUnique({
+      where: { id },
+      include: { _count: { select: { categories: true, products: true } } },
+    });
     if (!existing) {
-      throw new NotFoundException('World not found');
+      throw new WorldNotFoundException(id);
     }
 
-    const deleted = await this.prisma.world.delete({ where: { id } });
+    // Every FK to `worlds` in the schema is restrict-by-default, so deleting a
+    // World that still had sections used to fail with a raw Prisma P2003 and
+    // surface as a 500 — i.e. no World an Admin had actually composed could ever
+    // be deleted. Section composition has no meaning without its World, so it is
+    // removed with it, inside one transaction. A World that still holds a catalog
+    // is refused with a 409 instead, because cascading into products (and the
+    // orders referencing them) is a decision this route must not make silently.
+    if (existing._count.categories > 0 || existing._count.products > 0) {
+      throw new WorldNotEmptyException(existing._count.products, existing._count.categories);
+    }
+
+    const deleted = await this.prisma.$transaction(async (tx) => {
+      await tx.worldSection.deleteMany({ where: { worldId: id } });
+      return tx.world.delete({ where: { id } });
+    });
 
     await this.auditLogService.record({
       action: 'world.deleted',

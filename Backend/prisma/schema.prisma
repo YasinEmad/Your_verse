@@ -26,6 +26,11 @@ enum ProductStatus {
 }
 
 enum OrderStatus {
+  // PROCESSING = placed, awaiting delivery. Cash on Delivery has no checkout-time
+  // payment, so this — not PENDING — is the state a new Order lands in and the
+  // only state that can still be cancelled. PENDING is kept for rows created
+  // before that switch; it behaves identically as a pre-payment state.
+  PROCESSING
   PENDING
   PAID
   FULFILLED
@@ -234,4 +239,29 @@ model AuditLog {
   entityId    String
   metadata    Json
   createdAt   DateTime @default(now())
+}
+
+/// Retried-request short circuit — backend-architecture.md §20.
+///
+/// One row per (endpoint, client-supplied key). `scope` is the endpoint the key
+/// was issued for, so the same string used against two endpoints cannot collide.
+/// `response` holds the snapshot the retry replays; it is written in the *same*
+/// transaction as the order, so a key can never claim success for an order that
+/// was rolled back. A row with an empty `response` is an in-flight claim, not a
+/// success.
+model IdempotencyKey {
+  id         String   @id @default(uuid())
+  scope      String
+  key        String
+  /// Owner of the request that claimed the key. A replay by a different user is
+  /// refused rather than served, so a key can never be used to read someone
+  /// else's order.
+  userId     String?
+  statusCode Int      @default(201)
+  response   Json     @default("{}")
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+
+  @@unique([scope, key])
+  @@index([expiresAt])
 }

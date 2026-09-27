@@ -347,13 +347,14 @@ Do:
    d. Clears the cart.
    Store the Idempotency-Key with a snapshot of the response so a retried
    request returns the same result instead of double-creating an order.
-2. Build a PaymentProvider interface (per backend-architecture.md §7) with one
-   stub/mock implementation for v1 (e.g., "always succeeds") behind it —
-   OrdersService/PaymentsService must depend only on the interface, never the
-   concrete provider.
-3. POST /payments/webhook — also idempotency-key-protected (or provider
-   signature + event-id deduped), updates Payment.status and, on success,
-   advances Order.status to PAID.
+2. ~~Build a PaymentProvider interface with one stub/mock
+   implementation.~~ **Superseded — do not build.** Cash on delivery is the only
+   payment method, so there is no provider to abstract and nothing for a mock to
+   stand in for. See the "Do NOT" section below.
+3. ~~POST /payments/webhook that advances Order.status to PAID.~~
+   **Superseded — do not build.** A webhook is a callback from a payment
+   gateway; there is no gateway. Payment confirmation happens in-process when a
+   Shipment is marked DELIVERED.
 4. GET /orders (own orders, or all orders for @Permissions("orders.read")
    admin/shipping callers, scoped appropriately), GET /orders/:id,
    PATCH /orders/:id (@Permissions("orders.update")).
@@ -361,8 +362,20 @@ Do:
    per backend-architecture.md §7/§18.
 
 Do NOT:
-- Let OrdersService import a concrete payment SDK directly — only the
-  PaymentProvider interface.
+- Build the PaymentProvider interface, a stub provider, a
+  POST /payments/webhook, or any client-callable "mark as paid" route. This
+  phase ships cash on delivery only, and it is a decision rather than a
+  simplification: one payment path has no second implementation to abstract
+  over, so the interface would be one method body and no test double worth
+  having. Checkout creates a PENDING payment; the payment becomes PAID when
+  ShippingService marks a Shipment DELIVERED, which is the only path to PAID
+  in the system. The seam a future gateway would plug into is
+  PaymentsService.confirmOnDelivery. (This supersedes items 2 and 3 above and
+  §7/§12/§20's original provider-and-webhook wording, which has been corrected
+  to match.)
+- Let OrdersModule reach into Payments' data model. It calls PaymentsService
+  inside its transaction; ShippingModule may call PaymentsService, but only to
+  confirm on delivery.
 - Skip the transaction wrapper "for simplicity" — this is explicitly called
   out as the critical path that must never partially apply.
 

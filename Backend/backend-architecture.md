@@ -208,7 +208,7 @@ updateProduct(@Param("id") id: string, @Body() dto: UpdateProductDto) { ... }
 - **Products**: `worldId`, `categoryId`, price as `Decimal`, `status` enum (`DRAFT`, `ACTIVE`, `ARCHIVED`). Variants/images/inventory are child entities — a bare "Product" is never directly purchasable, a `ProductVariant` is (even single-variant products get one implicit variant, keeping Cart/Order logic uniform).
 - **Cart**: supports guest carts (identified by a signed cart-id cookie, separate from the auth session cookie) merged into the user's cart on login.
 - **Orders**: created from a Cart snapshot (denormalizes price/variant at time of purchase — never re-reads live product price after an order exists).
-- **Payments**: provider-agnostic `PaymentProvider` interface; concrete provider (Stripe, etc.) is an adapter behind it, so switching providers doesn't touch `OrdersService`.
+- **Payments**: **cash on delivery only** (Phase B7 decision). One path, so there is no `PaymentProvider` interface and no adapter — an abstraction with exactly one implementation is a guess about the future wearing a design's clothes. A checkout creates a `PENDING` payment; the shipping desk marks the parcel `DELIVERED`, and that is what marks the payment `PAID`. There is no pay endpoint, no webhook and no client-callable way to mark money collected. If a gateway is ever added, the seam is `PaymentsService.confirmOnDelivery`: it is already the only place that moves a payment to `PAID`, so a provider adapter sits in front of it and no order or shipping code changes.
 - **Shipping**: `Shipment` is 1:1 (or 1:many for split shipments) with `Order`, with its own status enum, intentionally decoupled from `OrderStatus` (an order can be `PAID` while its shipment is still `PROCESSING`).
 - **Admin/SuperAdmin**: expose aggregation/report endpoints and permission-gated CRUD passthroughs; contain no independent business rules.
 - **Audit**: `AuditLogService.record({ actorUserId, action, entityType, entityId, metadata })` called from service-layer mutations (not controllers) on every state-changing operation in Orders, Shipping, Worlds, SuperAdmin.
@@ -438,7 +438,7 @@ export type CreateProductDto = z.infer<typeof CreateProductSchema>;
 
 ## 12. Controllers / Services / Repositories
 
-Standard Nest layering: Controllers handle HTTP concerns (params, guards, status codes) and delegate immediately to Services, which hold business logic and call Prisma directly. No repository layer in v1 (see §8) except Payments, which gets a thin adapter interface (not a repository, a provider abstraction) since it wraps an external API rather than the database.
+Standard Nest layering: Controllers handle HTTP concerns (params, guards, status codes) and delegate immediately to Services, which hold business logic and call Prisma directly. No repository layer in v1 (see §8). Payments needs no exception either: it talks to the database like every other module, because cash on delivery means there is no external API to wrap (§7).
 
 ## 13. Error Handling
 
@@ -482,7 +482,7 @@ Order placement is the critical transaction: decrement inventory, create `Order`
 
 ## 20. Idempotency
 
-`POST /orders` and `POST /payments/webhook` accept/require an `Idempotency-Key` header; a small `idempotency_keys` table (key, response snapshot, expiry) short-circuits retried requests (common with payment webhooks and flaky checkout submissions) instead of double-charging or double-creating orders.
+`POST /orders` requires an `Idempotency-Key` header; a small `idempotency_keys` table (key, response snapshot, expiry) short-circuits retried requests instead of creating two orders. A checkout submission is the classic flaky one: the user clicks twice, or the response is lost on a slow connection and the app retries. Note the header is required, not accepted — a key minted per attempt is no protection at all, so the frontend holds one key per checkout *intent* and reuses it across retries (B7). The table is also why there is no `POST /payments/webhook` in this design: with one payment method, a checkout retry is the only replay that has to be safe.
 
 ## 21. API Versioning
 
@@ -550,4 +550,6 @@ Add a new module (e.g., `Reviews`), export a narrow service interface, inject on
 
 **Stays unchanged as the project grows:** the module boundary discipline, the Firebase-session-cookie auth model, the World/Section data shape, the permission-matrix-behind-guards pattern.
 
-**Likely to evolve:** the static `ROLE_PERMISSIONS` matrix becomes a DB-backed permissions table if per-user overrides are ever needed; Payments' single-adapter interface gains a second provider; Redis/BullMQ are introduced per §23/§24 once real load justifies them; if Payments ever needs independent compliance/scaling boundaries, its already-explicit module interface makes extraction into a separate service a bounded, low-risk change rather than a rewrite.
+**Likely to evolve:** the static `ROLE_PERMISSIONS` matrix becomes a DB-backed permissions table if per-user overrides are ever needed; Redis/BullMQ are introduced per §23/§24 once real load justifies them; if Payments ever needs independent compliance/scaling boundaries, its already-explicit module interface makes extraction into a separate service a bounded, low-risk change rather than a rewrite.
+
+**Decided against, for now:** a `PaymentProvider` interface. §7 originally called for one, and Phase B7 was asked to build it. With cash on delivery there is no second implementation to abstract over and no external API to wrap, so the interface would have had exactly one method body, no caller variation, and no test double that wasn't just re-implementing the service. `PaymentsService.confirmOnDelivery` is the seam instead — it is already the only code that moves a payment to `PAID`, so a real gateway gets an adapter in front of it without Orders or Shipping noticing. If a second method is ever needed, that is the moment to extract the interface, and it will be extracted from something that has been running.

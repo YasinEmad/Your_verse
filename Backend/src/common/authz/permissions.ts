@@ -14,7 +14,13 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     'worlds.sections.update',
     'shipping.read',
     'shipping.update',
+    'orders.read',
+    'orders.update',
   ],
   SUPER_ADMIN: ['*', 'super_admin.audit.read'],
-  SHIPPING: ['orders.read', 'shipping.read', 'shipping.update'],
+  // Shipping can see every order (it has to fulfil them) and can cancel one —
+  // the parcel is in their hands. It holds neither payment confirmation nor any
+  // other money path: money moves when a delivery is recorded, through
+  // PaymentsService, and that is not a route anyone can call directly.
+  SHIPPING: ['orders.read', 'orders.update', 'shipping.read', 'shipping.update'],
 };

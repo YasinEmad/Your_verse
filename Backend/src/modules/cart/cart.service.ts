@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ProductVariantNotFoundException } from '../products/products.exceptions';
 import {
@@ -223,6 +224,41 @@ export class CartService {
       where: { userId },
       include: cartInclude,
     });
+  }
+
+  /**
+   * Transaction-scoped cart read, for checkout.
+   *
+   * `resolveCart` reads through `this.prisma` and will happily *create* a cart or
+   * merge a guest cart into the user's — neither is acceptable mid-checkout: a
+   * cart that materialises after the caller decided to place an order, or a
+   * guest merge that writes outside the transaction, both break the all-or-
+   * nothing guarantee Orders depends on (§19). So checkout passes its own
+   * transaction client and this reads only what is already committed in it.
+   *
+   * Returns null when the user has no cart — the caller decides that an absent
+   * cart and an empty cart are the same 400 EMPTY_CART.
+   */
+  async loadForCheckout(
+    tx: Prisma.TransactionClient,
+    userId: string,
+  ): Promise<{ id: string; items: any[] } | null> {
+    return tx.cart.findFirst({
+      where: { userId },
+      include: cartInclude,
+    });
+  }
+
+  /**
+   * Empties a cart inside the caller's transaction.
+   *
+   * The item rows go first: `CartItem.cartId` is ON DELETE RESTRICT (not
+   * CASCADE), so deleting a cart that still has lines raises a foreign-key
+   * violation and takes the whole checkout transaction down with it.
+   */
+  async clearInTransaction(tx: Prisma.TransactionClient, cartId: string): Promise<void> {
+    await tx.cartItem.deleteMany({ where: { cartId } });
+    await tx.cart.delete({ where: { id: cartId } });
   }
 
   async getCart(userId?: string, guestId?: string) {

@@ -16,10 +16,10 @@
  * because it is already a de-facto standard name, so existing tooling and
  * libraries recognize it.
  *
- * The guard is global, so a new mutation cannot forget it. A future server-to-
- * server caller (a payment provider webhook, which cannot set custom headers)
- * opts out explicitly with `@SkipCsrf()` and takes responsibility for its own
- * origin verification. No route does today.
+ * The guard is global, so a new mutation cannot forget it. `@SkipCsrf()` exists
+ * for a future server-to-server caller that cannot set custom headers and takes
+ * responsibility for verifying its own origin. No route uses it: cash on
+ * delivery has no webhook, so every mutation comes from the browser app.
  */
 import { CanActivate, ExecutionContext, Injectable, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -31,7 +31,7 @@ export const CSRF_HEADER_VALUE = 'yourverse';
 const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const SKIP_CSRF_KEY = 'skipCsrf';
 
-/** Opt a route out of the header requirement (e.g. a signed webhook). */
+/** Opt a route out of the header requirement (e.g. a future signed callback). */
 export const SkipCsrf = () => SetMetadata(SKIP_CSRF_KEY, true);
 
 @Injectable()

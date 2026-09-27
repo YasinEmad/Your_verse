@@ -245,6 +245,19 @@ async function run() {
       String(preflight.headers['access-control-allow-headers'] ?? '').toLowerCase().includes('x-requested-with'),
       `allow-headers=${preflight.headers['access-control-allow-headers']}`);
 
+    // Checkout is the one request the browser makes with a header of its own
+    // (B7). A custom request header is not CORS-safelisted, so it turns every
+    // checkout into a preflight — if this header is missing from the allowlist,
+    // `POST /orders` works from curl and fails silently in the browser.
+    const checkoutPreflight = await request(server)
+      .options('/api/v1/orders')
+      .set('Origin', allowedOrigin)
+      .set('Access-Control-Request-Method', 'POST')
+      .set('Access-Control-Request-Headers', 'x-requested-with,idempotency-key');
+    assert('preflight approves Idempotency-Key, so the browser can check out',
+      String(checkoutPreflight.headers['access-control-allow-headers'] ?? '').toLowerCase().includes('idempotency-key'),
+      `allow-headers=${checkoutPreflight.headers['access-control-allow-headers']}`);
+
     const strangerPreflight = await request(server)
       .options('/api/v1/auth/session')
       .set('Origin', strangerOrigin)

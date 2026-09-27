@@ -1,12 +1,32 @@
 "use client";
 
-import React from "react";
-import { useOrders, useCreateOrder, usePayOrder } from "@/features/orders";
+import React, { useRef } from "react";
+import { useOrders, useCreateOrder } from "@/features/orders";
+
+const PAYMENT_COPY: Record<string, string> = {
+  PROCESSING: "Cash on delivery — pay the courier when it arrives.",
+  PENDING: "Cash on delivery — pay the courier when it arrives.",
+  PAID: "Paid in cash on delivery.",
+  CANCELLED: "Cancelled. Any reserved stock was returned.",
+  FULFILLED: "Completed.",
+  REFUNDED: "Refunded.",
+};
 
 export default function OrdersPage() {
   const { data: orders, isLoading, error } = useOrders();
   const create = useCreateOrder();
-  const pay = usePayOrder();
+  // One key per checkout *intent*, not per click: a double click, or a retry
+  // after a response that never arrived, must reach the backend as the same
+  // request rather than as two orders. Cleared only once an order really exists.
+  const checkoutKey = useRef<string | null>(null);
+
+  const placeOrder = () => {
+    checkoutKey.current ??= crypto.randomUUID();
+    create.mutate(
+      { idempotencyKey: checkoutKey.current },
+      { onSuccess: () => { checkoutKey.current = null; } },
+    );
+  };
 
   return (
     <div className="p-6">
@@ -15,11 +35,17 @@ export default function OrdersPage() {
       <div className="mb-4">
         <button
           className="px-3 py-2 bg-blue-600 text-white rounded"
-          onClick={() => create.mutate()}
+          onClick={placeOrder}
           disabled={create.status === "pending"}
         >
-          Create Order From Cart
+          Place Order From Cart
         </button>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Cash on delivery. Nothing is charged now — you pay the courier when the parcel arrives.
+        </p>
+        {create.error && (
+          <p className="mt-2 text-sm text-red-600">{create.error.message}</p>
+        )}
       </div>
 
       {isLoading && <p>Loading...</p>}
@@ -32,18 +58,17 @@ export default function OrdersPage() {
               <div>
                 <div className="font-medium">Order {o.id}</div>
                 <div className="text-sm text-muted-foreground">Status: {o.status}</div>
+                <div className="text-sm text-muted-foreground">
+                  {PAYMENT_COPY[o.status] ?? ""}
+                </div>
+                {o.shipment?.trackingNumber && (
+                  <div className="text-sm text-muted-foreground">
+                    Tracking: {o.shipment.carrier} {o.shipment.trackingNumber}
+                  </div>
+                )}
               </div>
               <div className="text-right">
-                <div className="font-semibold">{o.currency} {o.total}</div>
-                {o.status === "PENDING" && (
-                  <button
-                    className="mt-2 px-3 py-1 bg-green-600 text-white rounded"
-                    onClick={() => pay.mutate({ id: o.id, amount: o.total })}
-                    disabled={pay.status === "pending"}
-                  >
-                    Pay
-                  </button>
-                )}
+                <div className="font-semibold">{o.currency} {o.total.toFixed(2)}</div>
               </div>
             </div>
 

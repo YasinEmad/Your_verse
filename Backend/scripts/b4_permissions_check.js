@@ -34,6 +34,21 @@ const checks = [
     hasPermission('ADMIN', 'shipping.read') && hasPermission('ADMIN', 'shipping.update'), true],
   ['USER can read the catalog but not change it',
     hasPermission('USER', 'products.read') && !hasPermission('USER', 'products.update'), true],
+  // B7: cancelling an order restores stock, so ADMIN and SHIPPING hold
+  // `orders.update`. It is *not* a payment permission — nothing here can confirm
+  // a payment, which only a recorded delivery does.
+  ['ADMIN can read and update orders',
+    hasPermission('ADMIN', 'orders.read') && hasPermission('ADMIN', 'orders.update'), true],
+  ['SHIPPING can read and update orders',
+    hasPermission('SHIPPING', 'orders.read') && hasPermission('SHIPPING', 'orders.update'), true],
+  ['USER cannot update orders (no self-service cancel)',
+    hasPermission('USER', 'orders.update'), false],
+  // The wildcard is a catch-all, not a payment capability: confirming a payment
+  // is `PaymentsService.confirmOnDelivery`, called only when a shipment is marked
+  // delivered, and there is no route that exposes it. So the matrix must not
+  // invent a permission for it at all.
+  ['the matrix defines no payment-confirmation permission',
+    Object.values(ROLE_PERMISSIONS).some((allowed) => allowed.includes('payments.confirm')), false],
 ];
 
 let failed = 0;

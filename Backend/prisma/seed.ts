@@ -132,6 +132,10 @@ async function main() {
   await safeDeleteMany(() => prisma.shipment.deleteMany({}));
   await safeDeleteMany(() => prisma.payment.deleteMany({}));
   await safeDeleteMany(() => prisma.orderItem.deleteMany({}));
+  // Checkout idempotency keys hold a snapshot of the order they created. Wiping
+  // orders while keeping them would leave keys that replay an order which no
+  // longer exists, so they go with the orders.
+  await safeDeleteMany(() => prisma.idempotencyKey.deleteMany({}));
   await safeDeleteMany(() => prisma.order.deleteMany({}));
   await safeDeleteMany(() => prisma.cartItem.deleteMany({}));
   await safeDeleteMany(() => prisma.cart.deleteMany({}));

@@ -30,7 +30,18 @@ export const CORS_CONFIG = {
   credentials: true,
   methods: ['GET', 'HEAD', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
   // The docs UI and any Swagger-initiated browser call need to read the spec.
-  allowedHeaders: ['Content-Type', 'Accept', 'Authorization', 'X-Requested-With', 'X-Request-Id'],
+  // `Idempotency-Key` is a request header the browser must be allowed to send:
+  // it is not a CORS-safelisted header, so without it here the preflight for
+  // `POST /orders` fails and checkout is broken from the frontend while still
+  // working from curl — the exact kind of bug that only shows up in a browser.
+  allowedHeaders: [
+    'Content-Type',
+    'Accept',
+    'Authorization',
+    'X-Requested-With',
+    'X-Request-Id',
+    'Idempotency-Key',
+  ],
   exposedHeaders: ['X-Request-Id'],
   maxAge: 600,
 } as const;

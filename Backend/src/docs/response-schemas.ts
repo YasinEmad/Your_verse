@@ -159,34 +159,68 @@ export const cartSchema = z
 
 // ------------------------------------------------------------ orders (§7)
 
+/**
+ * Cash on delivery: a new order lands PROCESSING with a PENDING payment, and
+ * both flip to PAID together when the shipment is marked delivered. PENDING
+ * remains only for orders placed before that switch.
+ */
+export const paymentSchema = z
+  .object({
+    id,
+    orderId,
+    /** Always CASH_ON_DELIVERY. Not a client choice — there is no other method. */
+    provider: z.string(),
+    providerRef: z.string(),
+    status: z.enum(['PENDING', 'PAID']),
+    amount: money,
+    createdAt: timestamp,
+  })
+  .passthrough();
+
+export const orderShipmentSchema = z
+  .object({
+    id,
+    orderId,
+    status: z.enum(['ORDERED', 'PROCESSING', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED']),
+    trackingNumber: z.string().nullable(),
+    carrier: z.string().nullable(),
+    updatedAt: timestamp,
+  })
+  .passthrough();
+
 export const orderSchema = z
   .object({
     id,
     userId,
-    status: z.enum(['PENDING', 'PAID', 'FULFILLED', 'CANCELLED', 'REFUNDED']),
+    status: z.enum(['PROCESSING', 'PENDING', 'PAID', 'FULFILLED', 'CANCELLED', 'REFUNDED']),
     subtotal: money,
     tax: money,
     total: money,
     currency: z.string(),
+    recipientName: z.string().nullable().optional(),
+    recipientPhone: z.string().nullable().optional(),
+    shippingAddress: z.record(z.string(), z.unknown()).nullable().optional(),
     createdAt: timestamp,
     updatedAt: timestamp,
+    itemCount: z.number().int().nonnegative().optional(),
     items: z
       .array(
         z
           .object({
             id,
+            orderId: orderId.optional(),
             variantId,
+            /** Denormalized at checkout for reporting; never re-read from the product. */
+            worldId: worldId.optional(),
             quantity: z.number().int(),
             unitPrice: money.optional(),
-            variant: productVariantSchema
-              .extend({ product: productSchema.passthrough().optional() })
-              .optional(),
+            variant: productVariantSchema.optional(),
           })
           .passthrough(),
       )
       .optional(),
-    payment: z.record(z.string(), z.unknown()).nullable().optional(),
-    shipment: z.record(z.string(), z.unknown()).nullable().optional(),
+    payment: paymentSchema.nullable().optional(),
+    shipment: orderShipmentSchema.nullable().optional(),
   })
   .passthrough();
 

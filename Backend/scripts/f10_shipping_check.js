@@ -35,6 +35,9 @@ const request = require('supertest');
 const { PrismaService } = require('../dist/prisma/prisma.service');
 const { AuditLogService } = require('../dist/modules/audit/audit.service');
 const { AuditController } = require('../dist/modules/audit/audit.controller');
+// ShippingService confirms the cash payment when a parcel is delivered, so
+// PaymentsService is part of what this script has to wire up (B7).
+const { PaymentsService } = require('../dist/modules/payments/payments.service');
 const { ShippingController } = require('../dist/modules/shipping/shipping.controller');
 const { ShippingService } = require('../dist/modules/shipping/shipping.service');
 const { ProductsController } = require('../dist/modules/products/products.controller');
@@ -74,6 +77,7 @@ Module({
   providers: [
     PrismaService,
     AuditLogService,
+    PaymentsService,
     ShippingService,
     ProductsService,
     SuperAdminService,

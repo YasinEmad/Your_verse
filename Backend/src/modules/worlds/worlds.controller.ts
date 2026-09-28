@@ -9,7 +9,7 @@ import { RolesGuard } from '../../common/guards';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { THROTTLE_LIMITS } from '../../common/throttling/throttle-profiles';
 import { ApiErrorResponses, ApiZodBody, ApiZodCreatedResponse, ApiZodListResponse, ApiZodOkResponse } from '../../docs/decorators';
-import { worldBySlugSchema, worldListItemSchema } from '../../docs/response-schemas';
+import { worldBySlugSchema, worldIdentitySchema, worldListItemSchema } from '../../docs/response-schemas';
 
 /**
  * `CreateWorldSchema` — World *identity* only (backend-architecture.md §26:
@@ -60,6 +60,31 @@ const UpdateWorldSchema = z
 @Controller('worlds')
 export class WorldsController {
   constructor(private readonly worlds: WorldsService) {}
+
+  /**
+   * Public World index — the storefront's Home grid and Navbar world switcher
+   * (F5.5). No authentication, and *ACTIVE Worlds only*, so an INACTIVE World
+   * is never linked from public chrome.
+   *
+   * Declared **before** `@Get(':slug')` on purpose: NestJS matches in
+   * declaration order, so a `public` route added after the parameterized one
+   * would be swallowed by it and `GET /worlds/public` would 404 as an unknown
+   * slug. `/worlds` (the Super-Admin list, below) stays role-gated — this route
+   * is the public projection of the same rows, not a relaxation of that gate.
+   */
+  @Throttle({ default: THROTTLE_LIMITS.public })
+  @ApiOperation({
+    security: [],
+    summary: 'Public index of ACTIVE Worlds',
+    description:
+      'Identity fields only, no section composition — that stays on the per-slug route. Powers the ' +
+      'storefront Home grid and the world switcher in the global Navbar.',
+  })
+  @ApiZodListResponse(worldIdentitySchema, 'Every ACTIVE World')
+  @Get('public')
+  async listPublic() {
+    return this.worlds.listPublic();
+  }
 
   @Throttle({ default: THROTTLE_LIMITS.public })
   @ApiOperation({

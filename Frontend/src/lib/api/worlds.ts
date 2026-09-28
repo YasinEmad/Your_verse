@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { z } from "zod";
 import { apiFetch } from "./client";
 
@@ -118,6 +119,77 @@ export async function listWorlds(): Promise<WorldSummary[]> {
   const raw = await apiFetch<unknown>("/api/v1/worlds", { cache: "no-store" });
   return z.array(worldSummarySchema).parse(raw);
 }
+
+/**
+ * Public World index — `GET /api/v1/worlds/public`. The unauthenticated
+ * projection of the same rows `listWorlds()` returns, narrowed to ACTIVE Worlds
+ * with no `sectionCount`/`createdAt` (lifecycle bookkeeping the storefront has
+ * no use for) and never the section composition.
+ *
+ * This is the **one** World-listing function shared chrome may use: the Navbar's
+ * world switcher and the Home grid both read it, so neither can grow its own
+ * fetch (and neither can drift from the other). It is a *different* function
+ * from `listWorlds()` on purpose — that one is the Super-Admin lifecycle list,
+ * and reusing it here would make the storefront depend on a role-gated route
+ * (403 for every anonymous visitor) and leak INACTIVE Worlds into public links.
+ */
+export const publicWorldSchema = z.object({
+  id: z.string().min(1),
+  slug: z.string().min(1),
+  name: z.string().min(1),
+  status: z.enum(["ACTIVE", "INACTIVE"]).or(z.string()),
+  direction: z.enum(["ltr", "rtl", "LTR", "RTL"]).or(z.string()),
+  locale: z.string().nullable().optional(),
+  themeTokens: worldThemeTokensSchema.optional().default({}),
+  capabilities: z.record(z.string(), z.boolean()).default({}),
+});
+
+export type PublicWorld = z.infer<typeof publicWorldSchema>;
+
+async function fetchPublicWorlds(): Promise<PublicWorld[]> {
+  // `no-store` for the same reason as `getWorldBySlug`: a World created in
+  // Super Admin must show up in the switcher and the Home grid on the very next
+  // request, with no revalidate window in between.
+  const raw = await apiFetch<unknown>("/api/v1/worlds/public", { cache: "no-store" });
+  return z.array(publicWorldSchema).parse(raw);
+}
+
+/**
+ * `listActiveWorlds()` — React `cache()` wrapper around the public index, so the
+ * Navbar (root layout) and the Home page (which are rendered in the same
+ * request) resolve to **one** network call instead of two.
+ *
+ * It never throws. The Navbar sits above `{children}` in the root layout, so an
+ * `ApiError` escaping here would turn an unreachable backend or a transient 5xx
+ * into a 500 on *every* route in the app. An empty list degrades to a hidden
+ * switcher and the Home empty state instead, and the underlying error is
+ * reported on the server console for the Next.js log.
+ *
+ * The try/catch deliberately swallows validation failures too: `§16`'s Zod parse
+ * is a contract guard, not a reason for shared chrome to take down the page.
+ *
+ * One exception is re-thrown: Next's `DYNAMIC_SERVER_USAGE` "bail out of static
+ * rendering" signal, which arrives here during `next build` precisely *because*
+ * of the `no-store` above. It is control flow, not a failure — swallowing it
+ * would only log a scary error for the expected case, and the route ends up
+ * dynamic either way.
+ *
+ * Server Components only — `cache()` has no client-side runtime, and nothing
+ * here needs one. A Client Component that wanted this list should go through a
+ * TanStack Query hook against the same `fetchPublicWorlds()` shape instead
+ * (`§10`: the server owns the World's identity list for the first paint).
+ */
+export const listActiveWorlds = cache(async (): Promise<PublicWorld[]> => {
+  try {
+    return await fetchPublicWorlds();
+  } catch (error) {
+    if ((error as { digest?: string })?.digest === "DYNAMIC_SERVER_USAGE") {
+      throw error;
+    }
+    console.error("[worlds] public World index unavailable:", error);
+    return [];
+  }
+});
 
 /**
  * `POST /api/v1/worlds` — identity fields only. No `world_sections` in this

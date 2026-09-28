@@ -38,6 +38,42 @@ export class WorldsService {
   }
 
   /**
+   * Public World index — the storefront's Home grid and Navbar world switcher
+   * (frontend-architecture.md F5.5). Unauthenticated on purpose: a visitor who
+   * has not chosen a World yet cannot know which slug to load, so the only
+   * public World route that existed until now (`GET /worlds/:slug`) was
+   * unreachable for exactly the audience that needs it most.
+   *
+   * Deliberately narrower than the Super-Admin `list()` below, in three ways:
+   *  - **ACTIVE only.** An INACTIVE World is de-listed here; the storefront
+   *    404s it (`[worldSlug]/layout.tsx`), so linking to it would advertise a
+   *    dead route. Deactivation is lifecycle state (B9), not a storefront fact.
+   *  - **No `sectionCount`/`createdAt`.** Those exist for the Super-Admin
+   *    lifecycle screen to distinguish an un-composed World from a live one.
+   *    Public chrome has no such question to ask.
+   *  - **No `sections`, ever.** Composition is the Admin's concern and is served
+   *    only by the per-slug route below; this must not become a second source
+   *    for it.
+   */
+  async listPublic() {
+    const worlds = await this.prisma.world.findMany({
+      where: { status: 'ACTIVE' },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return worlds.map((world) => ({
+      id: world.id,
+      slug: world.slug,
+      name: world.name,
+      status: world.status,
+      direction: world.direction,
+      locale: world.locale,
+      themeTokens: world.themeTokens,
+      capabilities: world.capabilities,
+    }));
+  }
+
+  /**
    * Super-Admin listing for the World lifecycle screen (B9/F9): identity fields
    * only, plus a section count so the UI can tell an un-composed World from a
    * live one. Section *composition* (world_sections) is deliberately NOT

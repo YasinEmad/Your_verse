@@ -10,8 +10,10 @@ const arabicFont = Noto_Kufi_Arabic({
 
 export const ARABIC_FONT_CLASS = `font-[family-name:var(--font-arabic)] ${arabicFont.variable}`;
 
+/** Warm black with a sand-toned accent, mirroring the old cream palette. */
 export const ArabicLayout = worldLayout(
   "ArabicLayout",
-  "min-h-screen bg-[#f8f3ee] text-slate-900",
+  "min-h-screen bg-[#0a0908] text-foreground",
   ARABIC_FONT_CLASS,
+  { accent: "hsl(35 60% 62%)", onAccent: "hsl(35 60% 8%)" },
 );

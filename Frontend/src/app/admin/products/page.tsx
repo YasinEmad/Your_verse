@@ -23,44 +23,44 @@ export default function AdminProductsPage() {
     <main className="space-y-6 p-8">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             Admin
           </p>
-          <h1 className="text-3xl font-bold text-slate-900">Products</h1>
+          <h1 className="text-3xl font-bold text-foreground">Products</h1>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <label className="block text-sm font-medium text-slate-700">World ID</label>
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <label className="block text-sm font-medium text-foreground">World ID</label>
         <input
           value={worldId}
           onChange={(event) => setWorldId(event.target.value)}
-          className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-0 focus:border-slate-400"
+          className="mt-2 w-full rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none ring-0 focus:border-ring"
           placeholder="Enter a world ID"
         />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-sm text-slate-500">Products</p>
-          <p className="mt-2 text-3xl font-bold text-slate-900">{productCount}</p>
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <p className="text-sm text-muted-foreground">Products</p>
+          <p className="mt-2 text-3xl font-bold text-foreground">{productCount}</p>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">Catalog</h2>
+          <h2 className="text-lg font-semibold text-foreground">Catalog</h2>
         </div>
 
         {query.isLoading ? (
-          <p className="text-slate-500">Loading products…</p>
+          <p className="text-muted-foreground">Loading products…</p>
         ) : query.error ? (
-          <p className="text-red-600">Unable to load products for this world.</p>
+          <p className="text-red-400">Unable to load products for this world.</p>
         ) : query.data && query.data.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm text-slate-700">
+            <table className="min-w-full text-left text-sm text-foreground">
               <thead>
-                <tr className="border-b border-slate-200 text-slate-500">
+                <tr className="border-b border-border text-muted-foreground">
                   <th className="py-2 pe-4">Name</th>
                   <th className="py-2 pe-4">Status</th>
                   <th className="py-2 pe-4">Variants</th>
@@ -68,8 +68,8 @@ export default function AdminProductsPage() {
               </thead>
               <tbody>
                 {query.data.map((product) => (
-                  <tr key={product.id} className="border-b border-slate-100 align-top">
-                    <td className="py-2 pe-4 font-medium text-slate-900">{product.name}</td>
+                  <tr key={product.id} className="border-b border-border/60 align-top">
+                    <td className="py-2 pe-4 font-medium text-foreground">{product.name}</td>
                     <td className="py-2 pe-4">{product.status}</td>
                     <td className="py-2 pe-4">{product.variants.length}</td>
                   </tr>
@@ -78,7 +78,7 @@ export default function AdminProductsPage() {
             </table>
           </div>
         ) : (
-          <p className="text-slate-500">No products found for this world.</p>
+          <p className="text-muted-foreground">No products found for this world.</p>
         )}
       </div>
     </main>

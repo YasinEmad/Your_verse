@@ -51,26 +51,26 @@ export default function SuperAdminAuditLogPage() {
   return (
     <main className="space-y-6 p-8">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">Audit log</h1>
-        <p className="text-sm text-slate-600">
+        <h1 className="text-3xl font-bold text-foreground">Audit log</h1>
+        <p className="text-sm text-muted-foreground">
           Read-only record of privileged mutations across Worlds, orders, shipping and roles.
         </p>
       </div>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
         {query.isLoading || !query.data ? (
-          <p className="text-slate-500">Loading audit entries…</p>
+          <p className="text-muted-foreground">Loading audit entries…</p>
         ) : query.isError ? (
-          <p className="text-red-600" role="alert">
+          <p className="text-red-400" role="alert">
             {errorMessage(query.error, "Could not load the audit log")}
           </p>
         ) : query.data.items.length === 0 ? (
-          <p className="text-slate-500">No audit entries recorded yet.</p>
+          <p className="text-muted-foreground">No audit entries recorded yet.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm text-slate-700">
+            <table className="min-w-full text-left text-sm text-foreground">
               <thead>
-                <tr className="border-b border-slate-200 text-slate-500">
+                <tr className="border-b border-border text-muted-foreground">
                   <th className="py-2 pe-4">When</th>
                   <th className="py-2 pe-4">Action</th>
                   <th className="py-2 pe-4">Entity</th>
@@ -80,21 +80,21 @@ export default function SuperAdminAuditLogPage() {
               </thead>
               <tbody>
                 {query.data.items.map((entry) => (
-                  <tr key={entry.id} className="border-b border-slate-100 align-top">
-                    <td className="whitespace-nowrap py-2 pe-4 text-slate-500">
+                  <tr key={entry.id} className="border-b border-border/60 align-top">
+                    <td className="whitespace-nowrap py-2 pe-4 text-muted-foreground">
                       {formatTimestamp(entry.createdAt)}
                     </td>
-                    <td className="py-2 pe-4 font-medium text-slate-900">{entry.action}</td>
+                    <td className="py-2 pe-4 font-medium text-foreground">{entry.action}</td>
                     <td className="py-2 pe-4">
                       {entry.entityType}
                       {entry.entityId ? (
-                        <span className="ms-1 text-xs text-slate-500">#{entry.entityId}</span>
+                        <span className="ms-1 text-xs text-muted-foreground">#{entry.entityId}</span>
                       ) : null}
                     </td>
                     <td className="py-2 pe-4">
                       {entry.actor?.email ?? entry.actor?.id ?? entry.actorUserId ?? "system"}
                     </td>
-                    <td className="py-2 font-mono text-xs text-slate-600">
+                    <td className="py-2 font-mono text-xs text-muted-foreground">
                       {formatMetadata(entry.metadata)}
                     </td>
                   </tr>
@@ -104,7 +104,7 @@ export default function SuperAdminAuditLogPage() {
           </div>
         )}
 
-        <div className="mt-4 flex items-center justify-between gap-4 text-sm text-slate-600">
+        <div className="mt-4 flex items-center justify-between gap-4 text-sm text-muted-foreground">
           <p>
             Page {query.data?.page ?? page} of {totalPages} · {query.data?.total ?? 0} entries
           </p>
@@ -113,7 +113,7 @@ export default function SuperAdminAuditLogPage() {
               type="button"
               onClick={() => setPage((current) => Math.max(1, current - 1))}
               disabled={page <= 1 || query.isFetching}
-              className="rounded-lg border border-slate-200 px-3 py-1 disabled:opacity-50"
+              className="rounded-lg border border-border px-3 py-1 disabled:opacity-50"
             >
               Previous
             </button>
@@ -121,7 +121,7 @@ export default function SuperAdminAuditLogPage() {
               type="button"
               onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
               disabled={page >= totalPages || query.isFetching}
-              className="rounded-lg border border-slate-200 px-3 py-1 disabled:opacity-50"
+              className="rounded-lg border border-border px-3 py-1 disabled:opacity-50"
             >
               Next
             </button>

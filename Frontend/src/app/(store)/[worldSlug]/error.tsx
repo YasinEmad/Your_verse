@@ -8,9 +8,9 @@ export default function WorldError({
 }) {
   return (
     <div className="p-8 text-center">
-      <h2 className="text-xl font-semibold text-slate-900">Something went wrong.</h2>
+      <h2 className="text-xl font-semibold text-foreground">Something went wrong.</h2>
       <button
-        className="mt-4 rounded bg-slate-900 px-4 py-2 text-white"
+        className="mt-4 rounded bg-primary px-4 py-2 text-primary-foreground"
         onClick={() => reset()}
       >
         Try again

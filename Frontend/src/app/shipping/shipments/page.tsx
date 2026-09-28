@@ -31,13 +31,18 @@ import {
   type ShipmentStatus,
 } from "@/features/shipping";
 
+/**
+ * Badges are a translucent tint of their own hue with a light foreground: a
+ * solid `-100` fill only reads on a light canvas, and a `-800` foreground is
+ * unreadable on black.
+ */
 const STATUS_STYLES: Record<ShipmentStatus, string> = {
-  ORDERED: "bg-slate-100 text-slate-700",
-  PROCESSING: "bg-amber-100 text-amber-800",
-  SHIPPED: "bg-blue-100 text-blue-800",
-  OUT_FOR_DELIVERY: "bg-indigo-100 text-indigo-800",
-  DELIVERED: "bg-emerald-100 text-emerald-800",
-  CANCELLED: "bg-rose-100 text-rose-800",
+  ORDERED: "bg-muted text-foreground",
+  PROCESSING: "bg-amber-500/15 text-amber-300",
+  SHIPPED: "bg-sky-500/15 text-sky-300",
+  OUT_FOR_DELIVERY: "bg-violet-500/15 text-violet-300",
+  DELIVERED: "bg-emerald-500/15 text-emerald-300",
+  CANCELLED: "bg-destructive/15 text-red-400",
 };
 
 function errorMessage(error: unknown, fallback: string): string {
@@ -75,7 +80,7 @@ function Destination({ shipment }: { shipment: Shipment }) {
 
   if (!hasDestination) {
     return (
-      <p className="text-sm text-amber-700">
+      <p className="text-sm text-amber-400">
         No destination on this order — it predates checkout capturing an address.
       </p>
     );
@@ -84,9 +89,9 @@ function Destination({ shipment }: { shipment: Shipment }) {
   return (
     <div className="text-sm">
       {order.recipientName ? <p className="font-medium">{order.recipientName}</p> : null}
-      {order.recipientPhone ? <p className="text-slate-600">{order.recipientPhone}</p> : null}
+      {order.recipientPhone ? <p className="text-muted-foreground">{order.recipientPhone}</p> : null}
       {lines.length ? (
-        <p className="whitespace-pre-line text-slate-600">{lines.join("\n")}</p>
+        <p className="whitespace-pre-line text-muted-foreground">{lines.join("\n")}</p>
       ) : null}
     </div>
   );
@@ -113,15 +118,15 @@ function ShipmentRow({ shipment }: { shipment: Shipment }) {
     carrier !== (shipment.carrier ?? "");
 
   return (
-    <tr className="border-t border-slate-200 align-top">
+    <tr className="border-t border-border align-top">
       <td className="px-4 py-4">
-        <p className="font-mono text-xs text-slate-500">Order {shipment.order.id}</p>
+        <p className="font-mono text-xs text-muted-foreground">Order {shipment.order.id}</p>
         <p className="mt-1 text-sm">
           <span className="font-medium">{shipment.order.itemCount}</span> item
           {shipment.order.itemCount === 1 ? "" : "s"}
         </p>
-        <p className="text-xs text-slate-500">Order {shipment.order.status}</p>
-        <p className="text-xs text-slate-500">Placed {formatDate(shipment.order.placedAt)}</p>
+        <p className="text-xs text-muted-foreground">Order {shipment.order.status}</p>
+        <p className="text-xs text-muted-foreground">Placed {formatDate(shipment.order.placedAt)}</p>
       </td>
 
       <td className="px-4 py-4">
@@ -129,7 +134,7 @@ function ShipmentRow({ shipment }: { shipment: Shipment }) {
       </td>
 
       <td className="px-4 py-4">
-        <label className="block text-xs font-medium text-slate-600" htmlFor={`carrier-${shipment.id}`}>
+        <label className="block text-xs font-medium text-muted-foreground" htmlFor={`carrier-${shipment.id}`}>
           Carrier
         </label>
         <input
@@ -137,11 +142,11 @@ function ShipmentRow({ shipment }: { shipment: Shipment }) {
           value={carrier}
           onChange={(event) => setCarrier(event.target.value)}
           placeholder="DHL, Aramex, …"
-          className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+          className="mt-1 w-full rounded-lg border border-input px-2 py-1.5 text-sm"
         />
 
         <label
-          className="mt-3 block text-xs font-medium text-slate-600"
+          className="mt-3 block text-xs font-medium text-muted-foreground"
           htmlFor={`tracking-${shipment.id}`}
         >
           Tracking number
@@ -151,7 +156,7 @@ function ShipmentRow({ shipment }: { shipment: Shipment }) {
           value={trackingNumber}
           onChange={(event) => setTrackingNumber(event.target.value)}
           placeholder="1Z999AA10123456784"
-          className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+          className="mt-1 w-full rounded-lg border border-input px-2 py-1.5 text-sm"
         />
 
         <div className="mt-3 flex items-center gap-3">
@@ -164,11 +169,11 @@ function ShipmentRow({ shipment }: { shipment: Shipment }) {
                 { onError: (error) => alert(errorMessage(error, "Could not save label details")) },
               )
             }
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-40"
+            className="rounded-lg border border-input px-3 py-1.5 text-sm font-medium hover:bg-accent hover:text-foreground disabled:opacity-40"
           >
             {updateShipment.isPending ? "Saving…" : "Save"}
           </button>
-          {isDirty ? <span className="text-xs text-amber-700">Unsaved</span> : null}
+          {isDirty ? <span className="text-xs text-amber-400">Unsaved</span> : null}
         </div>
       </td>
 
@@ -199,7 +204,7 @@ function ShipmentRow({ shipment }: { shipment: Shipment }) {
                 },
               );
             }}
-            className="mt-3 w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+            className="mt-3 w-full rounded-lg border border-input px-2 py-1.5 text-sm"
           >
             <option value="">Move to…</option>
             {options.map((status) => (
@@ -209,10 +214,10 @@ function ShipmentRow({ shipment }: { shipment: Shipment }) {
             ))}
           </select>
         ) : (
-          <p className="mt-3 text-xs text-slate-500">No further transitions.</p>
+          <p className="mt-3 text-xs text-muted-foreground">No further transitions.</p>
         )}
 
-        <p className="mt-3 text-xs text-slate-400">Updated {formatDate(shipment.updatedAt)}</p>
+        <p className="mt-3 text-xs text-muted-foreground/70">Updated {formatDate(shipment.updatedAt)}</p>
       </td>
     </tr>
   );
@@ -227,7 +232,7 @@ export default function ShippingShipmentsPage() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold">Shipments</h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-muted-foreground">
             Update the carrier, tracking number and status. Order details are read-only.
           </p>
         </div>
@@ -235,33 +240,33 @@ export default function ShippingShipmentsPage() {
           type="button"
           onClick={() => shipmentsQuery.refetch()}
           disabled={shipmentsQuery.isFetching}
-          className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-50"
+          className="rounded-lg border border-input px-3 py-1.5 text-sm font-medium hover:bg-accent hover:text-foreground disabled:opacity-50"
         >
           {shipmentsQuery.isFetching ? "Refreshing…" : "Refresh"}
         </button>
       </header>
 
       {shipmentsQuery.isError ? (
-        <p className="mt-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+        <p className="mt-6 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-red-400">
           {errorMessage(shipmentsQuery.error, "Could not load shipments")}
         </p>
       ) : null}
 
       {shipmentsQuery.isLoading ? (
-        <p className="mt-6 text-sm text-slate-500">Loading shipments…</p>
+        <p className="mt-6 text-sm text-muted-foreground">Loading shipments…</p>
       ) : null}
 
       {shipmentsQuery.isSuccess && shipments.length === 0 ? (
-        <p className="mt-6 rounded-lg border border-slate-200 bg-white px-4 py-6 text-sm text-slate-600">
+        <p className="mt-6 rounded-lg border border-border bg-card px-4 py-6 text-sm text-muted-foreground">
           No shipments yet. They appear here as orders are paid.
         </p>
       ) : null}
 
       {shipments.length > 0 ? (
-        <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white">
+        <div className="mt-6 overflow-x-auto rounded-xl border border-border bg-card">
           <table className="w-full min-w-[60rem] border-collapse text-left">
             <thead>
-              <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+              <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="px-4 py-3 font-semibold">Order</th>
                 <th className="px-4 py-3 font-semibold">Destination</th>
                 <th className="px-4 py-3 font-semibold">Label details</th>

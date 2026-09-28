@@ -21,12 +21,12 @@ export default async function WorldHome({
 
   return (
     <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 md:px-8">
-      <header className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">World</p>
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">{world.name}</h1>
+      <header className="rounded-2xl border border-border bg-card/80 p-6 shadow-sm backdrop-blur-sm">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">World</p>
+        <h1 className="mt-2 text-3xl font-bold text-foreground">{world.name}</h1>
       </header>
 
-      {sections.length > 0 ? sections : <p className="text-slate-500">No active sections configured for this world.</p>}
+      {sections.length > 0 ? sections : <p className="text-muted-foreground">No active sections configured for this world.</p>}
     </main>
   );
 }

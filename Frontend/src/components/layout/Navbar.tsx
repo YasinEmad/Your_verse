@@ -10,7 +10,15 @@
  * interactive island is `<NavbarAuthSlot />`, a "use client" child — the layout
  * above it never becomes one.
  *
- * Three properties this component must not break:
+ * ## Shape
+ *
+ * A floating pill docked to the bottom of the viewport rather than a full-width
+ * bar across the top, so the brand and the World switcher hover over the content
+ * instead of permanently displacing it. The pill is opaque and carries its own
+ * hairline; the wrapper around it is `pointer-events-none` so only the pill
+ * itself — not the full-width strip it sits in — takes clicks.
+ *
+ * ## Three properties this component must not break:
  *
  * 1. **No World is named, counted or special-cased here.** `listActiveWorlds()`
  *    is the live DB read; a World added through Super Admin appears here with no
@@ -23,41 +31,79 @@
  *    which resolves to `[]` on failure, so an unreachable API degrades the
  *    switcher to nothing instead of taking down every route beneath it.
  *
- * Spacing uses Tailwind logical properties (`ms-`, `pe-`, `text-start`) so the
- * bar flips correctly under `dir="rtl"` without knowing RTL exists (§27).
+ * Spacing uses Tailwind logical properties (`ms-`, `me-`) so the pill mirrors
+ * correctly under `dir="rtl"` without knowing RTL exists (§27).
  */
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { listActiveWorlds } from "@/lib/api/worlds";
 import { NavbarAuthSlot } from "./NavbarAuthSlot";
 
+/**
+ * The wordmark glyph: a planet with a ring passing behind it. Drawn as two
+ * shapes rather than a clipped three, so the SVG needs no `<defs>` id — those
+ * would collide the moment this ever rendered twice on a page, and at 22px the
+ * ring reading as *behind* the body is indistinguishable from passing in front.
+ */
+function PlanetIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+      <ellipse
+        cx="12"
+        cy="12"
+        rx="10.5"
+        ry="3.6"
+        transform="rotate(-25 12 12)"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <circle cx="12" cy="12" r="6" fill="currentColor" />
+    </svg>
+  );
+}
+
 export async function Navbar() {
   const worlds = await listActiveWorlds();
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/90 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 md:px-8">
+    <div className="pointer-events-none fixed inset-x-0 bottom-8 z-50 flex justify-center px-4">
+      <nav
+        aria-label="Primary"
+        className={[
+          "pointer-events-auto flex items-center gap-2 rounded-full border border-border bg-card p-2",
+          // A drop shadow is nearly invisible against a black canvas, so the
+          // pill is separated by its hairline plus a soft bloom in the accent
+          // instead — the dark-mode equivalent of an elevated surface.
+          "shadow-[0_20px_50px_-20px_hsl(var(--primary)/0.35)]",
+        ].join(" ")}
+      >
         <Link
           href="/"
-          className="shrink-0 text-base font-semibold tracking-tight text-foreground"
+          aria-label="Yourverse — home"
+          className="group/logo grid size-11 shrink-0 place-items-center rounded-full bg-foreground text-background transition-transform duration-200 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-safe:group-hover/logo:-rotate-12 motion-safe:group-hover/logo:scale-105"
         >
-          Yourverse
+          <PlanetIcon />
         </Link>
 
-        <nav
-          aria-label="Worlds"
-          className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto"
-        >
+        {/*
+          The World switcher. On a narrow viewport the pill has no room for a row
+          of them, so they scroll sideways inside the pill rather than being
+          hidden — these links are the only way into a World, and dropping them
+          on phones would leave the storefront with no navigation at all.
+        */}
+        <ul className="me-2.5 ms-3 flex min-w-0 items-center gap-0.5 overflow-x-auto p-0">
           {worlds.map((world) => (
-            <Link
-              key={world.id}
-              href={`/${world.slug}`}
-              className="inline-flex h-8 shrink-0 items-center rounded-md px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              {world.name}
-            </Link>
+            <li key={world.id} className="shrink-0">
+              <Link
+                href={`/${world.slug}`}
+                className="block rounded-full px-3.5 py-2.5 text-[0.9375rem] font-medium whitespace-nowrap text-foreground transition-colors duration-200 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {world.name}
+              </Link>
+            </li>
           ))}
-        </nav>
+        </ul>
 
         {/*
           Cart affordance only. F6 owns cart: there is no cart query key to read
@@ -72,13 +118,13 @@ export async function Navbar() {
           aria-hidden="true"
           title="Cart is not available yet"
           data-cart-state="unavailable"
-          className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground opacity-50"
+          className="grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground opacity-50"
         >
           <ShoppingCart className="size-4" />
         </span>
 
         <NavbarAuthSlot />
-      </div>
-    </header>
+      </nav>
+    </div>
   );
 }

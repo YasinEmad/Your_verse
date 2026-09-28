@@ -67,27 +67,27 @@ export default function SuperAdminUsersPage() {
   return (
     <main className="space-y-6 p-8">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">Users</h1>
-        <p className="text-sm text-slate-600">
+        <h1 className="text-3xl font-bold text-foreground">Users</h1>
+        <p className="text-sm text-muted-foreground">
           Role changes take effect on the user&apos;s next request; every change is written to
           the audit log.
         </p>
       </div>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
         {usersQuery.isLoading || !usersQuery.data ? (
-          <p className="text-slate-500">Loading users…</p>
+          <p className="text-muted-foreground">Loading users…</p>
         ) : usersQuery.isError ? (
-          <p className="text-red-600" role="alert">
+          <p className="text-red-400" role="alert">
             {errorMessage(usersQuery.error, "Could not load users")}
           </p>
         ) : usersQuery.data.items.length === 0 ? (
-          <p className="text-slate-500">No users found.</p>
+          <p className="text-muted-foreground">No users found.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm text-slate-700">
+            <table className="min-w-full text-left text-sm text-foreground">
               <thead>
-                <tr className="border-b border-slate-200 text-slate-500">
+                <tr className="border-b border-border text-muted-foreground">
                   <th className="py-2 pe-4">User</th>
                   <th className="py-2 pe-4">Email</th>
                   <th className="py-2 pe-4">Role</th>
@@ -98,16 +98,16 @@ export default function SuperAdminUsersPage() {
                 {usersQuery.data.items.map((row) => {
                   const isSelf = row.id === sessionUser?.id;
                   return (
-                    <tr key={row.id} className="border-b border-slate-100 align-top">
-                      <td className="py-2 pe-4 font-medium text-slate-900">
+                    <tr key={row.id} className="border-b border-border/60 align-top">
+                      <td className="py-2 pe-4 font-medium text-foreground">
                         {row.displayName ?? "—"}
-                        {isSelf && <span className="ms-2 text-xs text-slate-500">(you)</span>}
+                        {isSelf && <span className="ms-2 text-xs text-muted-foreground">(you)</span>}
                       </td>
                       <td className="py-2 pe-4">{row.email ?? "—"}</td>
                       <td className="py-2 pe-4">{row.role}</td>
                       <td className="py-2">
                         {isSelf ? (
-                          <span className="text-xs text-slate-500">
+                          <span className="text-xs text-muted-foreground">
                             You cannot change your own role
                           </span>
                         ) : (
@@ -121,7 +121,7 @@ export default function SuperAdminUsersPage() {
                                 void changeRole(row.id, next as UserRole);
                               }
                             }}
-                            className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-sm outline-none focus:border-slate-400 disabled:opacity-50"
+                            className="rounded-lg border border-border bg-muted/30 px-2 py-1 text-sm outline-none focus:border-ring disabled:opacity-50"
                           >
                             {ROLES.map((role) => (
                               <option key={role} value={role}>
@@ -140,12 +140,12 @@ export default function SuperAdminUsersPage() {
         )}
 
         {failure && (
-          <p className="mt-3 text-sm text-red-600" role="alert">
+          <p className="mt-3 text-sm text-red-400" role="alert">
             {failure}
           </p>
         )}
 
-        <div className="mt-4 flex items-center justify-between gap-4 text-sm text-slate-600">
+        <div className="mt-4 flex items-center justify-between gap-4 text-sm text-muted-foreground">
           <p>
             Page {usersQuery.data?.page ?? page} of {totalPages} ·{" "}
             {usersQuery.data?.total ?? 0} users
@@ -155,7 +155,7 @@ export default function SuperAdminUsersPage() {
               type="button"
               onClick={() => setPage((current) => Math.max(1, current - 1))}
               disabled={page <= 1 || usersQuery.isFetching}
-              className="rounded-lg border border-slate-200 px-3 py-1 disabled:opacity-50"
+              className="rounded-lg border border-border px-3 py-1 disabled:opacity-50"
             >
               Previous
             </button>
@@ -163,7 +163,7 @@ export default function SuperAdminUsersPage() {
               type="button"
               onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
               disabled={page >= totalPages || usersQuery.isFetching}
-              className="rounded-lg border border-slate-200 px-3 py-1 disabled:opacity-50"
+              className="rounded-lg border border-border px-3 py-1 disabled:opacity-50"
             >
               Next
             </button>

@@ -110,108 +110,108 @@ export default function SuperAdminWorldsPage() {
     <main className="space-y-6 p-8">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Worlds</h1>
-          <p className="text-sm text-slate-600">
+          <h1 className="text-3xl font-bold text-foreground">Worlds</h1>
+          <p className="text-sm text-muted-foreground">
             Identity and lifecycle only — composing a World&apos;s sections is Admin&apos;s job.
           </p>
         </div>
         <Link
           href="/admin"
-          className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
         >
           Go to Admin
         </Link>
       </div>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">Create a World</h2>
-        <p className="mb-4 text-sm text-slate-600">
+      <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <h2 className="text-lg font-semibold text-foreground">Create a World</h2>
+        <p className="mb-4 text-sm text-muted-foreground">
           A new World is live at <code className="text-xs">/&lt;slug&gt;</code> immediately, with
           the default layout and no sections until an Admin composes it.
         </p>
 
         <form onSubmit={onCreate} noValidate className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-foreground">
             Name
             <input
               {...register("name")}
               placeholder="Retro Arcade"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-slate-400"
+              className="mt-1 w-full rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-ring"
             />
             {errors.name && (
-              <span className="mt-1 block text-xs text-red-600" role="alert">
+              <span className="mt-1 block text-xs text-red-400" role="alert">
                 {errors.name.message}
               </span>
             )}
           </label>
 
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-foreground">
             Slug
             <input
               {...register("slug")}
               placeholder="retro-arcade"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-slate-400"
+              className="mt-1 w-full rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-ring"
             />
             {errors.slug && (
-              <span className="mt-1 block text-xs text-red-600" role="alert">
+              <span className="mt-1 block text-xs text-red-400" role="alert">
                 {errors.slug.message}
               </span>
             )}
           </label>
 
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-foreground">
             Locale
             <input
               {...register("locale")}
               placeholder="en"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-slate-400"
+              className="mt-1 w-full rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-ring"
             />
             {errors.locale && (
-              <span className="mt-1 block text-xs text-red-600" role="alert">
+              <span className="mt-1 block text-xs text-red-400" role="alert">
                 {errors.locale.message}
               </span>
             )}
           </label>
 
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-foreground">
             Direction
             <select
               {...register("direction")}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-slate-400"
+              className="mt-1 w-full rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-ring"
             >
               <option value="ltr">Left to right</option>
               <option value="rtl">Right to left</option>
             </select>
             {errors.direction && (
-              <span className="mt-1 block text-xs text-red-600" role="alert">
+              <span className="mt-1 block text-xs text-red-400" role="alert">
                 {errors.direction.message}
               </span>
             )}
           </label>
 
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-foreground">
             Accent colour
             <input
               {...register("themeTokens.colors.accent")}
               placeholder="#2563eb"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-slate-400"
+              className="mt-1 w-full rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-ring"
             />
             {errors.themeTokens?.colors?.accent && (
-              <span className="mt-1 block text-xs text-red-600" role="alert">
+              <span className="mt-1 block text-xs text-red-400" role="alert">
                 {errors.themeTokens.colors.accent.message}
               </span>
             )}
           </label>
 
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-foreground">
             Background colour
             <input
               {...register("themeTokens.colors.background")}
               placeholder="#0b1020"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-slate-400"
+              className="mt-1 w-full rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm outline-none focus:border-ring"
             />
             {errors.themeTokens?.colors?.background && (
-              <span className="mt-1 block text-xs text-red-600" role="alert">
+              <span className="mt-1 block text-xs text-red-400" role="alert">
                 {errors.themeTokens.colors.background.message}
               </span>
             )}
@@ -221,7 +221,7 @@ export default function SuperAdminWorldsPage() {
             <button
               type="submit"
               disabled={createWorldMutation.isPending}
-              className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+              className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
             >
               {createWorldMutation.isPending ? "Creating…" : "Create World"}
             </button>
@@ -229,12 +229,12 @@ export default function SuperAdminWorldsPage() {
         </form>
 
         {createWorldMutation.isError && (
-          <p className="mt-3 text-sm text-red-600" role="alert">
+          <p className="mt-3 text-sm text-red-400" role="alert">
             {errorMessage(createWorldMutation.error, "Could not create the World")}
           </p>
         )}
         {createWorldMutation.isSuccess && (
-          <p className="mt-3 text-sm text-emerald-700" role="status">
+          <p className="mt-3 text-sm text-emerald-400" role="status">
             Created &quot;{createWorldMutation.data.name}&quot; — it is live at{" "}
             <Link className="underline" href={`/${createWorldMutation.data.slug}`}>
               /{createWorldMutation.data.slug}
@@ -243,27 +243,27 @@ export default function SuperAdminWorldsPage() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-lg font-semibold text-slate-900">All Worlds</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="text-lg font-semibold text-foreground">All Worlds</h2>
+          <p className="text-xs text-muted-foreground">
             Deleting a World is permanent and cascades to its products and sections.
           </p>
         </div>
 
         {worldsQuery.isLoading || !worldsQuery.data ? (
-          <p className="text-slate-500">Loading worlds…</p>
+          <p className="text-muted-foreground">Loading worlds…</p>
         ) : worldsQuery.isError ? (
-          <p className="text-red-600" role="alert">
+          <p className="text-red-400" role="alert">
             {errorMessage(worldsQuery.error, "Could not load Worlds")}
           </p>
         ) : worldsQuery.data.length === 0 ? (
-          <p className="text-slate-500">No Worlds yet — create the first one above.</p>
+          <p className="text-muted-foreground">No Worlds yet — create the first one above.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm text-slate-700">
+            <table className="min-w-full text-left text-sm text-foreground">
               <thead>
-                <tr className="border-b border-slate-200 text-slate-500">
+                <tr className="border-b border-border text-muted-foreground">
                   <th className="py-2 pe-4">Name</th>
                   <th className="py-2 pe-4">Slug</th>
                   <th className="py-2 pe-4">Status</th>
@@ -277,8 +277,8 @@ export default function SuperAdminWorldsPage() {
                 {worldsQuery.data.map((world) => {
                   const isActive = world.status === "ACTIVE";
                   return (
-                    <tr key={world.id} className="border-b border-slate-100 align-top">
-                      <td className="py-2 pe-4 font-medium text-slate-900">{world.name}</td>
+                    <tr key={world.id} className="border-b border-border/60 align-top">
+                      <td className="py-2 pe-4 font-medium text-foreground">{world.name}</td>
                       <td className="py-2 pe-4">
                         <Link className="underline" href={`/${world.slug}`}>
                           /{world.slug}
@@ -289,7 +289,7 @@ export default function SuperAdminWorldsPage() {
                       <td className="py-2 pe-4">{world.locale ?? "—"}</td>
                       <td className="py-2 pe-4">
                         {world.sectionCount === 0 ? (
-                          <span className="text-slate-500">none yet</span>
+                          <span className="text-muted-foreground">none yet</span>
                         ) : (
                           world.sectionCount
                         )}
@@ -305,13 +305,13 @@ export default function SuperAdminWorldsPage() {
                                 status: isActive ? "INACTIVE" : "ACTIVE",
                               })
                             }
-                            className="rounded-lg border border-slate-200 px-2 py-1 text-xs disabled:opacity-50"
+                            className="rounded-lg border border-border px-2 py-1 text-xs disabled:opacity-50"
                           >
                             {isActive ? "Deactivate" : "Activate"}
                           </button>
                           <Link
                             href={`/admin/worlds/${world.id}/sections`}
-                            className="rounded-lg border border-slate-200 px-2 py-1 text-xs"
+                            className="rounded-lg border border-border px-2 py-1 text-xs"
                           >
                             Compose (Admin)
                           </Link>
@@ -319,7 +319,7 @@ export default function SuperAdminWorldsPage() {
                             type="button"
                             disabled={deleteMutation.isPending || pendingDeleteId === world.id}
                             onClick={() => confirmDelete(world.id, world.slug, world.name)}
-                            className="rounded-lg border border-red-200 px-2 py-1 text-xs text-red-600 disabled:opacity-50"
+                            className="rounded-lg border border-destructive/40 px-2 py-1 text-xs text-red-400 disabled:opacity-50"
                           >
                             {pendingDeleteId === world.id ? "Deleting…" : "Delete"}
                           </button>
@@ -334,12 +334,12 @@ export default function SuperAdminWorldsPage() {
         )}
 
         {statusMutation.isError && (
-          <p className="mt-3 text-sm text-red-600" role="alert">
+          <p className="mt-3 text-sm text-red-400" role="alert">
             {errorMessage(statusMutation.error, "Could not change the World status")}
           </p>
         )}
         {deleteMutation.isError && (
-          <p className="mt-3 text-sm text-red-600" role="alert">
+          <p className="mt-3 text-sm text-red-400" role="alert">
             {errorMessage(deleteMutation.error, "Could not delete the World")}
           </p>
         )}

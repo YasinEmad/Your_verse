@@ -99,57 +99,57 @@ export default function AdminSectionEditorPage() {
   };
 
   if (!worldId) {
-    return <p className="p-8 text-slate-500">Missing world id.</p>;
+    return <p className="p-8 text-muted-foreground">Missing world id.</p>;
   }
 
   return (
     <main className="space-y-6 p-8">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Admin</p>
-          <h1 className="text-3xl font-bold text-slate-900">Section Editor</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Admin</p>
+          <h1 className="text-3xl font-bold text-foreground">Section Editor</h1>
         </div>
         <button
           type="button"
           onClick={() => reorderMutation.mutate()}
-          className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white"
+          className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
         >
           {reorderMutation.isPending ? "Saving…" : "Save order"}
         </button>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="space-y-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
           {sectionsQuery.isLoading ? (
-            <p className="text-slate-500">Loading sections…</p>
+            <p className="text-muted-foreground">Loading sections…</p>
           ) : liveSections.length === 0 ? (
-            <p className="text-slate-500">No sections configured for this world.</p>
+            <p className="text-muted-foreground">No sections configured for this world.</p>
           ) : (
             liveSections.map((section, index) => (
-              <div key={section.id} className="rounded-xl border border-slate-200 p-4">
+              <div key={section.id} className="rounded-xl border border-border p-4">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                       {section.type}
                     </p>
-                    <p className="text-sm text-slate-600">Position {index + 1}</p>
+                    <p className="text-sm text-muted-foreground">Position {index + 1}</p>
                   </div>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => moveSection(index, -1)}
-                      className="rounded-lg border border-slate-200 px-2 py-1 text-xs"
+                      className="rounded-lg border border-border px-2 py-1 text-xs"
                     >
                       ↑
                     </button>
                     <button
                       type="button"
                       onClick={() => moveSection(index, 1)}
-                      className="rounded-lg border border-slate-200 px-2 py-1 text-xs"
+                      className="rounded-lg border border-border px-2 py-1 text-xs"
                     >
                       ↓
                     </button>
-                    <label className="inline-flex items-center gap-2 text-xs text-slate-600">
+                    <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
                       <input
                         type="checkbox"
                         checked={section.enabled}
@@ -163,16 +163,16 @@ export default function AdminSectionEditorPage() {
                 <textarea
                   value={JSON.stringify(section.config, null, 2)}
                   onChange={(event) => handleConfigChange(section.id, event.target.value)}
-                  className="h-32 w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700 outline-none focus:border-slate-400"
+                  className="h-32 w-full rounded-xl border border-border bg-muted/30 p-3 text-xs text-foreground outline-none focus:border-ring"
                 />
               </div>
             ))
           )}
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-slate-900">Live preview</h2>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">Live preview</h2>
+          <div className="rounded-2xl border border-border bg-muted/30 p-3">
             {liveSections
               .filter((section) => section.enabled)
               .sort((a, b) => a.position - b.position)

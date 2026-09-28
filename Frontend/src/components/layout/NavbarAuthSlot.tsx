@@ -32,7 +32,7 @@ export function NavbarAuthSlot() {
   if (isLoading) {
     return (
       <div
-        className="h-8 w-24 animate-pulse rounded-md bg-muted"
+        className="h-11 w-24 shrink-0 animate-pulse rounded-full bg-muted"
         aria-hidden="true"
         data-testid="navbar-auth-loading"
       />
@@ -43,7 +43,7 @@ export function NavbarAuthSlot() {
     return (
       <Link
         href="/login"
-        className="inline-flex h-8 items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
+        className="inline-flex h-11 shrink-0 items-center rounded-full bg-foreground px-5 text-[0.9375rem] font-medium text-background transition-colors duration-200 hover:bg-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
       >
         Sign in
       </Link>
@@ -55,9 +55,13 @@ export function NavbarAuthSlot() {
   const label = user.displayName ?? user.email ?? "Account";
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex shrink-0 items-center gap-2">
+      {/*
+        Dropped below `sm`: the pill needs the room for the World switcher, and a
+        truncated name inside a 9999px-radius bar reads as a layout bug anyway.
+      */}
       <span
-        className="max-w-[12rem] truncate text-sm text-muted-foreground"
+        className="hidden max-w-[10rem] truncate text-sm text-muted-foreground sm:block"
         title={label}
       >
         {label}
@@ -66,7 +70,7 @@ export function NavbarAuthSlot() {
         type="button"
         onClick={() => logout.mutate()}
         disabled={logout.isPending}
-        className="inline-flex h-8 items-center rounded-md border border-border bg-background px-3 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-50"
+        className="inline-flex h-11 items-center rounded-full bg-foreground px-5 text-[0.9375rem] font-medium text-background transition-colors duration-200 hover:bg-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card disabled:opacity-50"
       >
         {logout.isPending ? "Signing out…" : "Sign out"}
       </button>

@@ -31,11 +31,11 @@ export function ChessHero({ config }: { config: ChessHeroConfig }) {
       : null;
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-amber-900/10 bg-[#f6f1e7] text-slate-900">
+    <section className="overflow-hidden rounded-2xl border border-amber-500/20 bg-[#100e0c] text-foreground">
       <div className="grid gap-8 px-6 py-10 md:grid-cols-[1.15fr_0.85fr] md:items-center md:px-10">
         <div>
           {config.eyebrow ? (
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-amber-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-amber-400">
               {config.eyebrow}
             </p>
           ) : null}
@@ -43,27 +43,27 @@ export function ChessHero({ config }: { config: ChessHeroConfig }) {
             {config.title}
           </h2>
           {config.subtitle ? (
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-700">
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
               {config.subtitle}
             </p>
           ) : null}
           {cta ? (
             <a
               href={cta.href}
-              className="mt-6 inline-flex items-center rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-[#f6f1e7] transition hover:bg-slate-800"
+              className="mt-6 inline-flex items-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/85"
             >
               {cta.label}
             </a>
           ) : null}
         </div>
 
-        <div className="rounded-2xl border border-amber-900/10 bg-white/70 p-5 shadow-sm backdrop-blur-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+        <div className="rounded-2xl border border-amber-500/15 bg-white/[0.03] p-5 backdrop-blur-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             Live position
           </p>
           <div
             dir="ltr"
-            className="mt-3 grid w-full grid-cols-8 overflow-hidden rounded-lg border border-amber-900/10"
+            className="mt-3 grid w-full grid-cols-8 overflow-hidden rounded-lg border border-amber-500/15"
             aria-hidden="true"
           >
             {Array.from({ length: 64 }, (_, index) => {
@@ -72,13 +72,13 @@ export function ChessHero({ config }: { config: ChessHeroConfig }) {
                 <span
                   key={index}
                   className={`flex aspect-square items-center justify-center text-lg ${
-                    (index % 8 + Math.floor(index / 8)) % 2 === 0 ? "bg-[#efdfc4]" : "bg-[#fbf7ef]"
+                    (index % 8 + Math.floor(index / 8)) % 2 === 0 ? "bg-[#3a342c]" : "bg-[#241f1a]"
                   }`}
                 >
                   {piece ? (
                     <span
                       className={
-                        piece.side === "light" ? "text-slate-900" : "text-slate-600 drop-shadow-sm"
+                        piece.side === "light" ? "text-[#f0e7d8]" : "text-[#9c8f7d]"
                       }
                     >
                       {piece.glyph}
@@ -92,9 +92,9 @@ export function ChessHero({ config }: { config: ChessHeroConfig }) {
           {stats.length > 0 ? (
             <dl className="mt-5 grid grid-cols-2 gap-3">
               {stats.map((stat) => (
-                <div key={stat.label} className="rounded-xl bg-white/80 p-3 text-start">
-                  <dt className="text-xs uppercase tracking-wide text-slate-500">{stat.label}</dt>
-                  <dd className="mt-1 text-lg font-semibold text-slate-900">{stat.value}</dd>
+                <div key={stat.label} className="rounded-xl bg-white/[0.04] p-3 text-start">
+                  <dt className="text-xs uppercase tracking-wide text-muted-foreground">{stat.label}</dt>
+                  <dd className="mt-1 text-lg font-semibold text-foreground">{stat.value}</dd>
                 </div>
               ))}
             </dl>

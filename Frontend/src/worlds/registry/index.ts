@@ -8,7 +8,10 @@ import { GamingLayout, GAMING_FONT_CLASS } from "./gaming";
 
 export interface WorldRegistryEntry {
   slug: string;
-  Layout: ComponentType<{ children: ReactNode }>;
+  Layout: ComponentType<{
+    children: ReactNode;
+    accent?: string;
+  }>;
   fontClassName: string;
   direction: "ltr" | "rtl";
 }

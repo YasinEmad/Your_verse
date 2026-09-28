@@ -16,7 +16,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [isAuthenticated, isLoading, router, user]);
 
   if (isLoading) {
-    return <div className="p-8 text-slate-500">Checking admin access…</div>;
+    return <div className="p-8 text-muted-foreground">Checking admin access…</div>;
   }
 
   if (!isAuthenticated || !user || (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN")) {

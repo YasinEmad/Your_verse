@@ -26,7 +26,13 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    /*
+      `dark` on `<html>`: the palette itself is the dark one and lives on
+      `:root` (globals.css), so this class is not what makes the page dark — it
+      is what makes Tailwind's `dark:` variants in the shadcn primitives resolve
+      to those same values rather than to a stale light copy.
+    */
+    <html lang="en" className="dark">
       {/*
         Root layout, above `{children}` — the Navbar is shared chrome for every
         route group (§3/§4: store, admin, super-admin, shipping), so it is
@@ -41,7 +47,7 @@ export default function RootLayout({
         (`useState`/context), unchanged.
       */}
       <body
-        className={`${geistSans.variable} ${geistMono.variable} flex min-h-dvh flex-col antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} flex min-h-dvh flex-col bg-black text-foreground antialiased`}
       >
         <QueryProvider>
           <ReduxProvider>

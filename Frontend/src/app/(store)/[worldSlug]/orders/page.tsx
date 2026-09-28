@@ -34,7 +34,7 @@ export default function OrdersPage() {
 
       <div className="mb-4">
         <button
-          className="px-3 py-2 bg-blue-600 text-white rounded"
+          className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/85 disabled:opacity-50"
           onClick={placeOrder}
           disabled={create.status === "pending"}
         >
@@ -44,16 +44,16 @@ export default function OrdersPage() {
           Cash on delivery. Nothing is charged now — you pay the courier when the parcel arrives.
         </p>
         {create.error && (
-          <p className="mt-2 text-sm text-red-600">{create.error.message}</p>
+          <p className="mt-2 text-sm text-red-400">{create.error.message}</p>
         )}
       </div>
 
       {isLoading && <p>Loading...</p>}
-      {error && <p className="text-red-600">Failed to load orders.</p>}
+      {error && <p className="text-red-400">Failed to load orders.</p>}
 
       <div className="space-y-4">
         {orders?.map((o) => (
-          <div key={o.id} className="p-4 border rounded">
+          <div key={o.id} className="rounded-xl border border-border bg-card p-4">
             <div className="flex justify-between items-center">
               <div>
                 <div className="font-medium">Order {o.id}</div>

@@ -37,7 +37,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   }, [isAuthenticated, isLoading, isSuperAdmin, router]);
 
   if (isLoading) {
-    return <div className="p-8 text-slate-500">Checking super admin access…</div>;
+    return <div className="p-8 text-muted-foreground">Checking super admin access…</div>;
   }
 
   if (!isAuthenticated || !isSuperAdmin) {
@@ -45,14 +45,16 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
+    <div className="min-h-screen bg-black text-foreground">
+      <header className="sticky top-0 z-40 border-b border-border/80 bg-black/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-8 py-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               Super Admin
             </p>
-            <p className="text-sm text-slate-600">{user.email ?? user.displayName ?? user.id}</p>
+            <p className="text-sm text-muted-foreground">
+              {user.email ?? user.displayName ?? user.id}
+            </p>
           </div>
 
           <nav className="flex items-center gap-2" aria-label="Super admin sections">
@@ -65,8 +67,8 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
                   aria-current={active ? "page" : undefined}
                   className={
                     active
-                      ? "rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white"
-                      : "rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                      ? "rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground"
+                      : "rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                   }
                 >
                   {item.label}
@@ -77,7 +79,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
               type="button"
               onClick={() => logout.mutate(undefined, { onSuccess: () => router.replace("/") })}
               disabled={logout.isPending}
-              className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+              className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
             >
               {logout.isPending ? "Signing out…" : "Sign out"}
             </button>

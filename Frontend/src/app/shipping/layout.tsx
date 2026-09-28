@@ -32,7 +32,7 @@ export default function ShippingLayout({ children }: { children: React.ReactNode
   }, [isAllowed, isAuthenticated, isLoading, router]);
 
   if (isLoading) {
-    return <div className="p-8 text-slate-500">Checking shipping access…</div>;
+    return <div className="p-8 text-muted-foreground">Checking shipping access…</div>;
   }
 
   if (!user || !isAuthenticated || !isAllowed) {
@@ -40,14 +40,14 @@ export default function ShippingLayout({ children }: { children: React.ReactNode
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
+    <div className="min-h-screen bg-black text-foreground">
+      <header className="sticky top-0 z-40 border-b border-border/80 bg-black/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-8 py-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               Shipping
             </p>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-muted-foreground">
               {user.email ?? user.displayName ?? user.id} · {user.role}
             </p>
           </div>
@@ -55,7 +55,7 @@ export default function ShippingLayout({ children }: { children: React.ReactNode
             type="button"
             onClick={() => logout.mutate(undefined, { onSuccess: () => router.replace("/") })}
             disabled={logout.isPending}
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+            className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
           >
             {logout.isPending ? "Signing out…" : "Sign out"}
           </button>

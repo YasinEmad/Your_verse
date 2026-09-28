@@ -170,10 +170,10 @@ export function ChessBoard({ config }: { config: ChessBoardConfig }) {
   }, [config]);
 
   return (
-    <section className="rounded-2xl border border-amber-900/10 bg-white p-6 text-slate-900">
+    <section className="rounded-2xl border border-amber-500/20 bg-[#100e0c] p-6 text-foreground">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400">
             {play ? "Playable board" : "Board preview"}
           </p>
           <h3 className="mt-2 text-2xl font-bold">{config.title ?? "Chess board"}</h3>
@@ -184,14 +184,14 @@ export function ChessBoard({ config }: { config: ChessBoardConfig }) {
               type="button"
               onClick={undo}
               disabled={history.length === 0}
-              className="rounded-full border border-slate-300 px-4 py-1.5 text-sm font-medium transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-full border border-border px-4 py-1.5 text-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
             >
               Undo
             </button>
             <button
               type="button"
               onClick={reset}
-              className="rounded-full bg-slate-900 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-slate-800"
+              className="rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/85"
             >
               Reset
             </button>
@@ -201,7 +201,7 @@ export function ChessBoard({ config }: { config: ChessBoardConfig }) {
 
       <div dir="ltr" className="mt-5 flex gap-1.5">
         {config.showCoordinates === false ? null : (
-          <div className="flex flex-col justify-around py-0.5 text-[0.6rem] font-semibold text-slate-500">
+          <div className="flex flex-col justify-around py-0.5 text-[0.6rem] font-semibold text-muted-foreground">
             {RANKS.map((rank) => (
               <span key={rank} className="flex h-full items-center">
                 {rank}
@@ -214,7 +214,7 @@ export function ChessBoard({ config }: { config: ChessBoardConfig }) {
           <div
             role="group"
             aria-label={play ? "Playable chess board" : "Chess board preview"}
-            className="grid grid-cols-8 overflow-hidden rounded-lg border border-amber-900/15"
+            className="grid grid-cols-8 overflow-hidden rounded-lg border border-amber-500/20"
           >
             {RANKS.flatMap((rank, rowIndex) =>
               FILES.map((file, colIndex) => {
@@ -233,17 +233,21 @@ export function ChessBoard({ config }: { config: ChessBoardConfig }) {
                     aria-label={describeSquare(square, game)}
                     aria-pressed={isSelected}
                     className={`relative flex aspect-square items-center justify-center text-3xl leading-none transition sm:text-4xl ${
-                      light ? "bg-[#efdfc4] hover:bg-[#e6d2b0]" : "bg-[#fbf7ef] hover:bg-[#f2e7d6]"
-                    } ${isLastMove ? "ring-2 ring-inset ring-amber-500/70" : ""}`}
+                      light ? "bg-[#3a342c] hover:bg-[#463f35]" : "bg-[#241f1a] hover:bg-[#2e2822]"
+                    } ${isLastMove ? "ring-2 ring-inset ring-amber-400/80" : ""}`}
                   >
                     {isTarget ? (
                       <span
                         aria-hidden="true"
-                        className="absolute h-2.5 w-2.5 rounded-full bg-emerald-600/70"
+                        className="absolute h-2.5 w-2.5 rounded-full bg-emerald-400/80"
                       />
                     ) : null}
                     {piece ? (
-                      <span className={piece.color === "w" ? "text-slate-900" : "text-slate-700"}>
+                      <span
+                        className={
+                          piece.color === "w" ? "text-[#f0e7d8]" : "text-[#9c8f7d]"
+                        }
+                      >
                         {GLYPHS[`${piece.color}${piece.type}`] ?? ""}
                       </span>
                     ) : null}
@@ -254,7 +258,7 @@ export function ChessBoard({ config }: { config: ChessBoardConfig }) {
           </div>
 
           {config.showCoordinates === false ? null : (
-            <div className="mt-1 flex justify-around text-[0.6rem] font-semibold text-slate-500">
+            <div className="mt-1 flex justify-around text-[0.6rem] font-semibold text-muted-foreground">
               {FILES.map((file) => (
                 <span key={file}>{file}</span>
               ))}
@@ -263,12 +267,12 @@ export function ChessBoard({ config }: { config: ChessBoardConfig }) {
         </div>
       </div>
 
-      <p aria-live="polite" className="mt-4 text-sm text-slate-600">
+      <p aria-live="polite" className="mt-4 text-sm text-muted-foreground">
         {message}
       </p>
 
       {play && history.length > 0 ? (
-        <p className="mt-1 text-xs text-slate-500">Moves: {history.join(" ")}</p>
+        <p className="mt-1 text-xs text-muted-foreground">Moves: {history.join(" ")}</p>
       ) : null}
     </section>
   );

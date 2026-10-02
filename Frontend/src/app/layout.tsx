@@ -52,7 +52,7 @@ export default function RootLayout({
         <QueryProvider>
           <ReduxProvider>
             <Navbar />
-            <div className="flex flex-1 flex-col">{children}</div>
+            <div className="flex flex-1 flex-col pt-16">{children}</div>
             <Footer />
           </ReduxProvider>
         </QueryProvider>

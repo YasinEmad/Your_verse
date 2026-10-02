@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Isometra&family=Ruwudu:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -90,10 +92,17 @@
   html {
     @apply bg-black;
     -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-black text-foreground;
+    overflow-x: hidden;
+  }
+
+  .hero-isometra {
+    font-family: "Isometra", "Segoe UI", sans-serif;
+    letter-spacing: -0.06em;
   }
 
   ::selection {

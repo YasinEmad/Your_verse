@@ -4,7 +4,7 @@ import "./globals.css";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { ReduxProvider } from "@/providers/ReduxProvider";
 import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
+import { HomeFooter } from "@/components/home/HomeFooter";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -53,7 +53,7 @@ export default function RootLayout({
           <ReduxProvider>
             <Navbar />
             <div className="flex flex-1 flex-col pt-16">{children}</div>
-            <Footer />
+            <HomeFooter />
           </ReduxProvider>
         </QueryProvider>
       </body>

@@ -482,8 +482,8 @@ async function main() {
       ],
     }),
     seedWorld({
-      slug: 'gaming',
-      name: 'Gaming World',
+      slug: 'tech',
+      name: 'Tech',
       direction: Direction.LTR,
       locale: 'en',
       themeTokens: {

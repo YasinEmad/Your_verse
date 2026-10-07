@@ -56,9 +56,6 @@ function Divider() {
 export async function Navbar() {
   const worlds = await listActiveWorlds();
 
-  const getWorldFont = (direction?: string) =>
-    direction?.toLowerCase() === "rtl" ? "Ruwudu, 'Segoe UI', sans-serif" : "Isometra, sans-serif";
-
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-3 sm:px-4 sm:pt-4">
       <nav
@@ -118,8 +115,7 @@ export async function Navbar() {
                 <Link
                   href={`/${world.slug}`}
                   className="block rounded-full px-3.5 py-2 text-[0.9375rem] font-medium whitespace-nowrap text-muted-foreground transition-colors duration-200 hover:bg-accent hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  style={{ fontFamily: getWorldFont(world.direction) }}
-                  dir={world.direction?.toLowerCase() === "rtl" ? "rtl" : "ltr"}
+                  style={{ fontFamily: "Isometra, sans-serif" }}
                 >
                   {world.name}
                 </Link>

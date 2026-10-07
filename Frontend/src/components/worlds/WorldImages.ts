@@ -21,6 +21,7 @@ const IMAGES: Record<string, StaticImageData> = {
   chess: chessHero,
   anime: animeHero,
   arabic: arabHero,
+  arab: arabHero,
   gaming: gamingHero,
 };
 

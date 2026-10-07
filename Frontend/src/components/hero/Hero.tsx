@@ -34,8 +34,8 @@
  * background, add `mix-blend-screen` to the wrapper marked (A) below.
  */
 import Image from "next/image";
-import chessHero from "@/components/chessHero.jpeg";
-import techHero from "@/components/techHero.jpg";
+import hero2 from "@/components/hero2.jpg";
+import hero from "@/components/hero.jpg";
 
 export type HeroWorld = {
   id: string;
@@ -130,8 +130,8 @@ export function Hero({ worlds = DEMO_WORLDS }: { worlds?: HeroWorld[] }) {
           <div className="hero-drift-a absolute inset-x-0 top-[4%] h-[84%]">
             <div className="hero-shard hero-shard-a absolute inset-0 overflow-hidden bg-neutral-900">
               <Image
-                src={techHero}
-                alt="Futuristic tech portrait"
+                src={hero}
+                alt="Hero image"
                 fill
                 priority
                 sizes="(min-width: 1024px) 480px, 48vw"
@@ -147,8 +147,8 @@ export function Hero({ worlds = DEMO_WORLDS }: { worlds?: HeroWorld[] }) {
           <div className="hero-drift-b absolute inset-x-0 top-[14%] h-[80%]">
             <div className="hero-shard hero-shard-b absolute inset-0 overflow-hidden bg-neutral-900">
               <Image
-                src={chessHero}
-                alt="Chess scene with players at a board"
+                src={hero2}
+                alt="Hero second image"
                 fill
                 priority
                 sizes="(min-width: 1024px) 480px, 48vw"
@@ -181,7 +181,7 @@ export function Hero({ worlds = DEMO_WORLDS }: { worlds?: HeroWorld[] }) {
       </div>
 
       <style>{`
-        @property --hue { syntax: "<number>"; inherits: true; initial-value: ${BASE_HUE}; }
+        @property --hue { syntax: '<number>'; inherits: true; initial-value: ${BASE_HUE}; }
 
         .hero-root {
           --dir: 1;
@@ -189,7 +189,7 @@ export function Hero({ worlds = DEMO_WORLDS }: { worlds?: HeroWorld[] }) {
           --rift: oklch(0.76 0.11 var(--hue));
           transition: --hue 700ms ease;
         }
-        [dir="rtl"] .hero-root { --dir: -1; }
+        [dir='rtl'] .hero-root { --dir: -1; }
         ${hueRules}
 
         /* Rift colour drives the line, the halo and the edge light */
@@ -210,10 +210,10 @@ export function Hero({ worlds = DEMO_WORLDS }: { worlds?: HeroWorld[] }) {
           border-start-end-radius: 1.75rem;
           border-end-end-radius: 1.75rem;
         }
-        [dir="rtl"] .hero-shard-a {
+        [dir='rtl'] .hero-shard-a {
           clip-path: polygon(0 0, 92% 0, 100% 100%, 4% 100%, 9% 91%, 1% 79%, 11% 65%, 2% 51%, 10% 37%, 0 23%, 8% 11%);
         }
-        [dir="rtl"] .hero-shard-b {
+        [dir='rtl'] .hero-shard-b {
           clip-path: polygon(0 0, 100% 0, 92% 11%, 100% 23%, 90% 37%, 98% 51%, 89% 65%, 99% 79%, 91% 91%, 96% 100%, 0 100%);
         }
 
@@ -228,8 +228,8 @@ export function Hero({ worlds = DEMO_WORLDS }: { worlds?: HeroWorld[] }) {
             linear-gradient(to left, color-mix(in oklab, var(--rift) 32%, transparent), transparent 42%),
             linear-gradient(to right, transparent 70%, rgb(0 0 0 / .35));
         }
-        [dir="rtl"] .hero-edge-a { transform: scaleX(-1); }
-        [dir="rtl"] .hero-edge-b { transform: scaleX(-1); }
+        [dir='rtl'] .hero-edge-a { transform: scaleX(-1); }
+        [dir='rtl'] .hero-edge-b { transform: scaleX(-1); }
 
         /* Hover on the stage: worlds drift a touch further apart */
         .hero-drift-a, .hero-drift-b { transition: translate 700ms cubic-bezier(.2,.7,.2,1); }
@@ -262,7 +262,7 @@ export function Hero({ worlds = DEMO_WORLDS }: { worlds?: HeroWorld[] }) {
         }
         .hero-twinkle { animation: hero-twinkle 6s ease-in-out infinite; }
         .hero-shoot   { animation: hero-shoot 16s ease-in 3s infinite; opacity: 0; }
-        [dir="rtl"] .hero-shoot { scale: -1 1; }
+        [dir='rtl'] .hero-shoot { scale: -1 1; }
 
         @media (prefers-reduced-motion: reduce) {
           .hero-twinkle, .hero-shoot, .hero-rift polyline,

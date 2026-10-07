@@ -151,7 +151,21 @@ async function fetchPublicWorlds(): Promise<PublicWorld[]> {
   // Super Admin must show up in the switcher and the Home grid on the very next
   // request, with no revalidate window in between.
   const raw = await apiFetch<unknown>("/api/v1/worlds/public", { cache: "no-store" });
-  return z.array(publicWorldSchema).parse(raw);
+
+  return z.array(publicWorldSchema).parse(raw).map((world) => {
+    const shouldNormalizeToTech =
+      world.slug.toLowerCase() === "gaming" || world.name.toLowerCase().includes("gaming");
+
+    if (!shouldNormalizeToTech) {
+      return world;
+    }
+
+    return {
+      ...world,
+      slug: "tech",
+      name: "Tech",
+    };
+  });
 }
 
 /**

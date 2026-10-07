@@ -73,13 +73,6 @@ export function WorldCard({ world, image }: WorldCardProps) {
     "--clip-open-rtl": tornEdge(OPEN, true),
   } as CSSProperties;
 
-  const chip = cn(
-    "rounded-full border px-2.5 py-0.5 text-xs backdrop-blur-sm",
-    onImage
-      ? "border-white/20 bg-black/40 text-white/80"
-      : "border-border bg-background/60 text-muted-foreground",
-  );
-
   return (
     <Link
       href={`/${world.slug}`}
@@ -141,12 +134,6 @@ export function WorldCard({ world, image }: WorldCardProps) {
           />
         </>
       )}
-
-      {/* Locale facts sit at the top of the doorway */}
-      <div className="absolute inset-x-5 top-5 z-10 flex flex-wrap gap-2">
-        <span className={chip}>{world.locale ?? "en"}</span>
-        {isRtl && <span className={chip}>Right to left</span>}
-      </div>
 
       <h3
         dir={isRtl ? "rtl" : "ltr"}

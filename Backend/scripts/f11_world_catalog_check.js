@@ -1,5 +1,5 @@
 /**
- * F11 verification — the remaining Worlds (Chess, Arabic RTL, Gaming).
+ * F11 verification — the remaining Worlds (Chess, Arabic RTL, Gaming, Tech).
  *
  * The storefront's World pages are pure data + registry, so "F11 works" is a set
  * of claims about data and code that can silently rot:
@@ -98,6 +98,26 @@ const CONFIG_RULES = {
   character_showcase: (config) => Array.isArray(config.characterIds),
   chess_hero: (config) => typeof config.title === 'string',
   chess_board: (config) => ['preview', 'puzzle'].includes(config.mode),
+  tech_hero: (config) => typeof config.title === 'string',
+  tech_realms: (config) =>
+    (config.eyebrow === undefined || typeof config.eyebrow === 'string') &&
+    (config.title === undefined || typeof config.title === 'string') &&
+    (config.subtitle === undefined || typeof config.subtitle === 'string') &&
+    (config.ctaLabel === undefined || typeof config.ctaLabel === 'string') &&
+    (config.ticker === undefined ||
+      (Array.isArray(config.ticker) && config.ticker.every((item) => typeof item === 'string'))) &&
+    (config.realms === undefined ||
+      (Array.isArray(config.realms) &&
+        config.realms.every(
+          (realm) =>
+            typeof realm?.title === 'string' &&
+            typeof realm?.blurb === 'string' &&
+            (realm.href === undefined || typeof realm.href === 'string') &&
+            (realm.icon === undefined ||
+              ['chip', 'orbit', 'wave', 'terminal'].includes(realm.icon)) &&
+            (realm.accent === undefined ||
+              ['cyan', 'violet', 'blue', 'fuchsia'].includes(realm.accent)),
+        ))),
 };
 
 const EXPECTED_WORLDS = [
@@ -105,6 +125,7 @@ const EXPECTED_WORLDS = [
   { slug: 'chess', direction: 'LTR', minSections: 4 },
   { slug: 'arabic', direction: 'RTL', minSections: 3 },
   { slug: 'gaming', direction: 'LTR', minSections: 4 },
+  { slug: 'tech', direction: 'LTR', minSections: 4 },
 ];
 
 async function run() {
@@ -207,6 +228,11 @@ async function run() {
         character_showcase: { characterIds: ['a'] },
         chess_hero: { title: 'CH' },
         chess_board: { mode: 'preview' },
+        tech_hero: { title: 'TH' },
+        tech_realms: {
+          eyebrow: '// choose your signal',
+          realms: [{ title: 'Keyboards', blurb: 'Keys and switches.' }],
+        },
       }[type];
       const res = await request(server)
         .post(`/api/v1/worlds/${worldId}/sections`)

@@ -176,7 +176,7 @@ export default function AdminSectionEditorPage() {
             {liveSections
               .filter((section) => section.enabled)
               .sort((a, b) => a.position - b.position)
-              .map((section) => renderSection({ ...section, config: section.config }))}
+              .map((section) => renderSection({ ...section, config: section.config }, { worldId }))}
           </div>
         </div>
       </div>

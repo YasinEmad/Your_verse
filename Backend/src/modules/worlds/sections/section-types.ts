@@ -26,6 +26,8 @@ export const KNOWN_SECTION_TYPES = [
   'character_showcase',
   'chess_hero',
   'chess_board',
+  'tech_hero',
+  'tech_realms',
 ] as const;
 
 export type KnownSectionType = (typeof KNOWN_SECTION_TYPES)[number];

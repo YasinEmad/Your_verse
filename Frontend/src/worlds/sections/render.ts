@@ -7,7 +7,17 @@ type SectionLike = {
   id?: string;
 };
 
-export function renderSection(raw: unknown): React.ReactNode {
+export type SectionRenderContext = {
+  /** The backing World row, passed to sections that render live product data. */
+  worldId?: string;
+  /** The World's route slug, for building internal storefront links. */
+  worldSlug?: string;
+};
+
+export function renderSection(
+  raw: unknown,
+  context: SectionRenderContext = {},
+): React.ReactNode {
   if (!raw || typeof raw !== "object") {
     console.warn("renderSection: expected an object, received a non-object value.");
     return null;
@@ -37,6 +47,8 @@ export function renderSection(raw: unknown): React.ReactNode {
 
   const Component = SECTION_COMPONENTS[section.type as SectionType] as React.ComponentType<{
     config: unknown;
+    worldId?: string;
+    worldSlug?: string;
   }>;
   if (!Component) {
     console.warn(`renderSection: no component registered for section type "${section.type}".`);
@@ -46,5 +58,7 @@ export function renderSection(raw: unknown): React.ReactNode {
   return React.createElement(Component, {
     key: section.id ?? section.type,
     config: parsed.data,
+    ...(context.worldId ? { worldId: context.worldId } : {}),
+    ...(context.worldSlug ? { worldSlug: context.worldSlug } : {}),
   });
 }

@@ -7,6 +7,15 @@ export function useOrders() {
   return useQuery<api.Order[]>({ queryKey: ["orders"], queryFn: api.listOrders, retry: 1 });
 }
 
+export function useOrder(orderId: string) {
+  return useQuery<api.Order>({
+    queryKey: ["orders", orderId],
+    queryFn: () => api.getOrder(orderId),
+    enabled: Boolean(orderId),
+    retry: 1,
+  });
+}
+
 /**
  * Checkout. The key is supplied by the caller rather than generated here so the
  * *same* key can be reused for a retry of the same checkout — generating a fresh
@@ -14,9 +23,15 @@ export function useOrders() {
  */
 export function useCreateOrder() {
   const qc = useQueryClient();
-  return useMutation<api.Order, Error, { idempotencyKey: string }>({
-    mutationFn: ({ idempotencyKey }: { idempotencyKey: string }) => api.createOrder(idempotencyKey),
-    onSuccess: () => qc.invalidateQueries({ predicate: (q) => q.queryKey?.[0] === "orders" }),
+  return useMutation<
+    api.Order,
+    Error,
+    { idempotencyKey: string; details?: api.CheckoutDetailsInput }
+  >({
+    mutationFn: ({ idempotencyKey, details }) =>
+      api.createOrder(idempotencyKey, details),
+    onSuccess: () =>
+      qc.invalidateQueries({ predicate: (q) => q.queryKey?.[0] === "orders" }),
   });
 }
 

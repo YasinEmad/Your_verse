@@ -558,7 +558,12 @@ async function httpPhase() {
       .post('/api/v1/orders')
       .set(CSRF, csrf[0])
       .set(asCustomer)
-      .set('Idempotency-Key', key);
+      .set('Idempotency-Key', key)
+      .send({
+        recipientName: 'Ada Lovelace',
+        recipientPhone: '+1-555-0100',
+        shippingAddress: { line1: '1 Analytical Engine Way', city: 'London', country: 'UK' },
+      });
     const parsed = orderSchema.safeParse(placed.body);
     assert(
       'POST /orders with a key returns 201 and a documented order',
@@ -569,6 +574,18 @@ async function httpPhase() {
 
     const orderId = placed.body?.id;
     created.orders.push(orderId);
+
+    // The cash-on-delivery destination is captured by checkout itself: a
+    // customer holds no `orders.update`, so there is no later route that could
+    // amend it. It must therefore survive on the order row, not just the reply.
+    const persistedOrder = await prisma.order.findUnique({ where: { id: orderId } });
+    assert(
+      'the checkout body persists the cash-on-delivery destination',
+      placed.body?.recipientName === 'Ada Lovelace' &&
+        persistedOrder?.recipientPhone === '+1-555-0100' &&
+        persistedOrder?.shippingAddress?.city === 'London',
+      `name=${placed.body?.recipientName} phone=${persistedOrder?.recipientPhone} city=${persistedOrder?.shippingAddress?.city}`,
+    );
 
     // Cash on delivery has exactly one way in. The B7 decision is to have no
     // pay endpoint at all — not a disabled one, not one behind a role — so the

@@ -43,10 +43,10 @@
  */
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
 import logo2 from "@/components/logo2.png";
 import { listActiveWorlds } from "@/lib/api/worlds";
 import { NavbarAuthSlot } from "./NavbarAuthSlot";
+import { NavbarCart } from "./NavbarCart";
 
 /** Hairline between zones. It encodes grouping, so it is hidden from AT. */
 function Divider() {
@@ -127,22 +127,13 @@ export async function Navbar() {
         <Divider />
 
         {/*
-          Cart affordance only. F6 owns cart: there is no cart query key to read
-          yet (`features/cart` is an empty barrel), and this chrome cannot build
-          a cart URL without knowing which World it is sitting above — which would
-          be exactly the `worldSlug` branching §32 forbids. So the icon is
-          rendered inert rather than given a fabricated count or a link to an
-          arbitrary World's cart. F6 replaces this block with a link plus a live
-          count from the cart query key; nothing else in this file changes.
+          Cart + World-aware URL. The island is a `"use client"` child: the cart
+          count comes from the `["cart"]` query key, and the link target is the
+          World it is sitting above, derived from the active route's first
+          segment (reserved top-level routes fall back to an inert icon). Only
+          this block changes for F6; nothing above is World-branching (§32).
         */}
-        <span
-          aria-hidden="true"
-          title="Cart is not available yet"
-          data-cart-state="unavailable"
-          className="grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground opacity-50"
-        >
-          <ShoppingCart className="size-4" />
-        </span>
+        <NavbarCart />
 
         <NavbarAuthSlot />
       </nav>

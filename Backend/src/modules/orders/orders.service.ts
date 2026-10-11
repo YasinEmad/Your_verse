@@ -102,6 +102,13 @@ type IdempotencyRow = {
   expiresAt: Date;
 };
 
+/** Details collected on the checkout form and stamped onto the Order row. */
+export interface CheckoutDetails {
+  recipientName?: string;
+  recipientPhone?: string;
+  shippingAddress?: Record<string, unknown>;
+}
+
 @Injectable()
 export class OrdersService {
   constructor(
@@ -119,7 +126,11 @@ export class OrdersService {
    * be retried safely is the difference between "the user clicked twice" and "the
    * store sold one item twice" (§20).
    */
-  async createOrder(userId: string, idempotencyKey: string | undefined) {
+  async createOrder(
+    userId: string,
+    idempotencyKey: string | undefined,
+    details: CheckoutDetails = {},
+  ) {
     const key = this.normalizeIdempotencyKey(idempotencyKey);
 
     // Two attempts, and only for one reason: re-taking a key whose claimer died
@@ -136,7 +147,7 @@ export class OrdersService {
       }
 
       try {
-        const placed = await this.runCheckout(claim.id, userId);
+        const placed = await this.runCheckout(claim.id, userId, details);
         await this.auditLogService.record({
           actorUserId: userId,
           action: 'order.created',
@@ -172,7 +183,7 @@ export class OrdersService {
    * the response snapshot is stored *inside* it, so a key can never point at an
    * order that was rolled back.
    */
-  private async runCheckout(claimId: string, userId: string) {
+  private async runCheckout(claimId: string, userId: string, details: CheckoutDetails = {}) {
     return this.prisma.$transaction(async (tx) => {
       const cart = await this.cartService.loadForCheckout(tx, userId);
       if (!cart || cart.items.length === 0) {
@@ -233,6 +244,10 @@ export class OrdersService {
           tax,
           total,
           currency,
+          recipientName: details.recipientName ?? null,
+          recipientPhone: details.recipientPhone ?? null,
+          shippingAddress:
+            (details.shippingAddress ?? undefined) as Prisma.InputJsonValue | undefined,
         },
       });
 

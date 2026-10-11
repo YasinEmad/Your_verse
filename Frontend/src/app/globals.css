@@ -97,7 +97,16 @@
 
   body {
     @apply bg-black text-foreground;
+    /*
+     * `overflow-x: hidden` computes `overflow-y` to `auto`, which turns <body>
+     * into a scroll container and silently breaks every descendant
+     * `position: sticky` (the Tech World hero pins its inner frame to the
+     * viewport while scrolling). `overflow-x: clip` clips the same horizontal
+     * overflow without creating a scroll container, so sticky keeps working.
+     * The `hidden` line stays first as a fallback for engines without `clip`.
+     */
     overflow-x: hidden;
+    overflow-x: clip;
   }
 
   .hero-isometra {

@@ -27,6 +27,18 @@ const OrderStatusSchema = z.enum(['PENDING', 'PROCESSING', 'PAID', 'FULFILLED', 
  * (REFUNDED implies a charge that never existed), so the enum deliberately has
  * one member.
  */
+/**
+ * Checkout details captured at order placement. A customer cannot set these
+ * through `PATCH /orders/:id` (that route is gated behind `orders.update`,
+ * which only ADMIN / SHIPPING hold), so the shipping destination for a cash-on-
+ * delivery parcel has to be collected by `POST /orders` itself.
+ */
+const CreateOrderSchema = z.object({
+  recipientName: z.string().trim().max(200).optional(),
+  recipientPhone: z.string().trim().max(40).optional(),
+  shippingAddress: z.record(z.string(), z.unknown()).optional(),
+});
+
 const UpdateOrderSchema = z
   .object({
     status: z.literal('CANCELLED').optional(),
@@ -71,15 +83,21 @@ export class OrdersController {
     description:
       'Client-generated key (8-200 chars) identifying this checkout attempt. Reuse it verbatim when retrying.',
   })
+  @ApiZodBody(CreateOrderSchema)
   @ApiZodCreatedResponse(orderSchema, 'Order created in PROCESSING with a PENDING payment')
   @ApiErrorResponses({ auth: true })
   @UseGuards(FirebaseSessionGuard)
   @Post()
   async createOrder(
     @CurrentUser() user: AuthenticatedUser,
+    // The body is optional: existing clients that place an order without a
+    // destination still work (the parcel just ships to the account address),
+    // while the storefront sends the cash-on-delivery destination here.
+    @Body(new ZodValidationPipe(CreateOrderSchema.optional()))
+    body: z.infer<typeof CreateOrderSchema> | undefined,
     @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.ordersService.createOrder(user.id, idempotencyKey);
+    return this.ordersService.createOrder(user.id, idempotencyKey, body);
   }
 
   @ApiOperation({
